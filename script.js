@@ -2,7 +2,7 @@
 
 /* ========================================
    CHINH VIDEO DOWNLOADER
-   Frontend JavaScript & Firebase Auth Integration
+   Frontend JavaScript & Direct Database Integration
 ======================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -135,10 +135,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  /* ========================================
-     CHỌN NỀN TẢNG THỦ CÔNG & NÚT DÁN/XÓA
-  ======================================== */
-
   platforms.forEach((item) => {
     item.addEventListener("click", () => {
       const name = item.dataset.platform;
@@ -176,10 +172,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-
-  /* ========================================
-     ĐIỀU HƯỚNG CÁC TRANG (SECTIONS)
-  ======================================== */
 
   function openSection(target) {
     const targetSection = document.getElementById(target);
@@ -221,7 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 /* ========================================
-   CẤU HÌNH VÀ XỬ LÝ FIREBASE AUTH & TRIAL
+   CẤU HÌNH BẢO MẬT VÀ XỬ LÝ DATABASE TÀI KHOẢN
 ======================================== */
 const firebaseConfig = {
   apiKey: "AIzaSy4cm_F8s2qD0EpcRjwgLFg2bsHvwK-ibAc",
@@ -236,164 +228,116 @@ const firebaseConfig = {
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
-const auth = firebase.auth();
 const db = firebase.firestore();
 
-// Theo dõi trạng thái tài khoản đăng nhập
-auth.onAuthStateChanged((user) => {
-  const authScreen = document.getElementById('authScreen');
-  const registerSection = document.getElementById('registerSection');
-  const lockScreen = document.getElementById('lockScreen');
-  const mainAppContent = document.getElementById('mainAppContent');
+// Kiểm tra xem trình duyệt đã lưu đăng nhập chưa
+document.addEventListener("DOMContentLoaded", () => {
+  const savedUsername = localStorage.getItem("chinh_username");
 
-  if (user) {
-    // Kiểm tra xem đã xác minh email chưa trước khi cho vào trang chủ
-    user.reload().then(() => {
-      if (user.emailVerified) {
-        if (authScreen) authScreen.style.display = 'none';
-        if (registerSection) registerSection.style.display = 'none';
-        checkTrialStatus(user.uid);
-      } else {
-        // Chưa xác minh thì hiển thị màn hình chờ xác minh
-        if (authScreen) authScreen.style.display = 'none';
-        if (registerSection) {
-          registerSection.style.display = 'flex';
-          document.getElementById('registerFormDiv').style.display = 'none';
-          document.getElementById('verifyEmailDiv').style.display = 'block';
-        }
-        if (lockScreen) lockScreen.style.display = 'none';
-        if (mainAppContent) mainAppContent.style.display = 'none';
-      }
-    });
+  if (savedUsername) {
+    checkTrialStatusDirect(savedUsername);
   } else {
-    if (authScreen) authScreen.style.display = 'flex';
-    if (registerSection) registerSection.style.display = 'none';
-    if (lockScreen) lockScreen.style.display = 'none';
-    if (mainAppContent) mainAppContent.style.display = 'none';
+    document.getElementById('authScreen').style.display = 'flex';
   }
 });
 
-// 1. Đăng ký tài khoản mới + Gửi email xác minh
+// 1. Tạo tài khoản mới (ID không trùng + Tự cấp mã VN-xxxxxx)
 function handleSignup() {
-  const email = document.getElementById('regEmail').value.trim();
+  const username = document.getElementById('regUsername').value.trim().toLowerCase();
   const password = document.getElementById('regPassword').value;
   const msgElement = document.getElementById('regMessage');
 
-  if (!email || !password) {
-    if (msgElement) msgElement.innerText = "Vui lòng nhập đầy đủ Gmail và mật khẩu!";
-    return;
-  }
-
-  auth.createUserWithEmailAndPassword(email, password)
-    .then((userCredential) => {
-      const user = userCredential.user;
-      
-      user.sendEmailVerification().then(() => {
-        const uniqueId = 'VN-' + Math.floor(100000 + Math.random() * 900000);
-        const currentTime = new Date().getTime();
-
-        db.collection("users").doc(user.uid).set({
-          email: email,
-          uniqueId: uniqueId,
-          createdAt: currentTime,
-          status: "trial"
-        }).then(() => {
-          // Chuyển sang giao diện thông báo chờ xác minh
-          document.getElementById('registerFormDiv').style.display = 'none';
-          document.getElementById('verifyEmailDiv').style.display = 'block';
-          if (msgElement) msgElement.innerText = "";
-        });
-      });
-    })
-    .catch((error) => {
-      if (msgElement) {
-        msgElement.style.color = "#d92d3a";
-        msgElement.innerText = "Lỗi: " + error.message;
-      }
-    });
-}
-
-// Kiểm tra khi người dùng bấm nút "Tôi đã xác minh"
-function checkEmailVerificationStatus() {
-  const user = auth.currentUser;
-  const msgElement = document.getElementById('regMessage');
-
-  if (user) {
-    user.reload().then(() => {
-      if (user.emailVerified) {
-        alert("Xác minh thành công! Chào mừng bạn đến với trang chủ.");
-        checkTrialStatus(user.uid);
-      } else {
-        if (msgElement) {
-          msgElement.style.color = "#d92d3a";
-          msgElement.innerText = "Bạn chưa bấm vào đường dẫn xác minh trong email! Vui lòng kiểm tra lại hộp thư.";
-        }
-      }
-    });
-  }
-}
-
-// 2. Đăng nhập tài khoản
-function handleLogin() {
-  const email = document.getElementById('authEmail').value.trim();
-  const password = document.getElementById('authPassword').value;
-  const msgElement = document.getElementById('authMessage');
-
-  if (!email || !password) {
-    if (msgElement) msgElement.innerText = "Vui lòng nhập email và mật khẩu!";
-    return;
-  }
-
-  auth.signInWithEmailAndPassword(email, password)
-    .then((userCredential) => {
-      const user = userCredential.user;
-      user.reload().then(() => {
-        if (!user.emailVerified) {
-          auth.signOut();
-          if (msgElement) {
-            msgElement.style.color = "#d92d3a";
-            msgElement.innerText = "Tài khoản chưa xác minh email! Vui lòng kiểm tra hộp thư.";
-          }
-        }
-      });
-    })
-    .catch((error) => {
-      if (msgElement) {
-        msgElement.style.color = "#d92d3a";
-        msgElement.innerText = "Sai tài khoản hoặc mật khẩu!";
-      }
-    });
-}
-
-// 3. Quên mật khẩu
-function handleForgotPassword() {
-  const email = document.getElementById('authEmail').value.trim();
-  const msgElement = document.getElementById('authMessage');
-
-  if (!email) {
+  if (!username || !password) {
     if (msgElement) {
       msgElement.style.color = "#d92d3a";
-      msgElement.innerText = "Vui lòng nhập Gmail vào ô bên trên để lấy lại mật khẩu!";
+      msgElement.innerText = "Vui lòng nhập đầy đủ Tên tài khoản và Mật khẩu!";
     }
     return;
   }
 
-  auth.sendPasswordResetEmail(email)
-    .then(() => {
-      if (msgElement) {
-        msgElement.style.color = "#168344";
-        msgElement.innerText = "Đã gửi liên kết khôi phục mật khẩu tới email: " + email;
-      }
-    })
-    .catch((error) => {
+  // Kiểm tra tên tài khoản đã trùng chưa
+  const userRef = db.collection("app_users").doc(username);
+
+  userRef.get().then((doc) => {
+    if (doc.exists) {
       if (msgElement) {
         msgElement.style.color = "#d92d3a";
-        msgElement.innerText = "Lỗi: " + error.message;
+        msgElement.innerText = "Tên tài khoản này đã tồn tại! Vui lòng chọn tên khác.";
       }
-    });
+    } else {
+      // Sinh mã định danh VN-xxxxxx (6 chữ số ngẫu nhiên)
+      const randomCode = Math.floor(100000 + Math.random() * 900000);
+      const uniqueId = 'VN-' + randomCode;
+      const currentTime = new Date().getTime();
+
+      // Lưu tài khoản vào database
+      userRef.set({
+        username: username,
+        password: password,
+        uniqueId: uniqueId,
+        createdAt: currentTime,
+        status: "trial"
+      }).then(() => {
+        // Tự động lưu đăng nhập
+        localStorage.setItem("chinh_username", username);
+        alert("Tạo tài khoản thành công! Mã định danh của bạn: " + uniqueId);
+        checkTrialStatusDirect(username);
+      }).catch((error) => {
+        if (msgElement) {
+          msgElement.style.color = "#d92d3a";
+          msgElement.innerText = "Lỗi khi tạo tài khoản: " + error.message;
+        }
+      });
+    }
+  });
 }
 
-// 4. Chức năng ẩn/hiện mật khẩu (Icon con mắt)
+// 2. Đăng nhập tài khoản
+function handleLogin() {
+  const username = document.getElementById('authUsername').value.trim().toLowerCase();
+  const password = document.getElementById('authPassword').value;
+  const msgElement = document.getElementById('authMessage');
+
+  if (!username || !password) {
+    if (msgElement) msgElement.innerText = "Vui lòng nhập Tên tài khoản và Mật khẩu!";
+    return;
+  }
+
+  db.collection("app_users").doc(username).get().then((doc) => {
+    if (doc.exists) {
+      const userData = doc.data();
+      if (userData.password === password) {
+        // Lưu phiên đăng nhập
+        localStorage.setItem("chinh_username", username);
+        checkTrialStatusDirect(username);
+      } else {
+        if (msgElement) {
+          msgElement.style.color = "#d92d3a";
+          msgElement.innerText = "Sai mật khẩu!";
+        }
+      }
+    } else {
+      if (msgElement) {
+        msgElement.style.color = "#d92d3a";
+        msgElement.innerText = "Tên tài khoản không tồn tại!";
+      }
+    }
+  }).catch((error) => {
+    if (msgElement) msgElement.innerText = "Lỗi kết nối: " + error.message;
+  });
+}
+
+// 3. Quên mật khẩu
+function handleForgotPassword() {
+  const username = document.getElementById('authUsername').value.trim();
+  if (!username) {
+    alert("Vui lòng nhập Tên tài khoản vào ô bên trên trước!");
+    return;
+  }
+  alert("Vui lòng liên hệ Admin qua TikTok: @tyty_99_4 và đọc Tên tài khoản (" + username + ") để được hỗ trợ cấp lại mật khẩu!");
+}
+
+// 4. Con mắt ẩn/hiện mật khẩu
 function togglePasswordVisibility(inputId, iconId) {
   const passwordInput = document.getElementById(inputId);
   const toggleIcon = document.getElementById(iconId);
@@ -408,37 +352,37 @@ function togglePasswordVisibility(inputId, iconId) {
   }
 }
 
-// Chuyển đổi qua lại giữa màn hình Đăng nhập và Đăng ký
+// Chuyển đổi giao diện Đăng nhập / Đăng ký
 function showAuthSection(sectionId) {
   const loginSection = document.getElementById('authScreen');
   const registerSection = document.getElementById('registerSection');
   
   if (sectionId === 'register') {
     if (loginSection) loginSection.style.display = 'none';
-    if (registerSection) {
-      registerSection.style.display = 'flex';
-      document.getElementById('registerFormDiv').style.display = 'block';
-      document.getElementById('verifyEmailDiv').style.display = 'none';
-    }
+    if (registerSection) registerSection.style.display = 'flex';
   } else {
     if (loginSection) loginSection.style.display = 'flex';
     if (registerSection) registerSection.style.display = 'none';
   }
 }
 
-// Đăng xuất tài khoản
+// Đăng xuất
 function handleLogout() {
-  auth.signOut();
+  localStorage.removeItem("chinh_username");
+  location.reload();
 }
 
-// Kiểm tra thời hạn dùng thử 14 ngày
-function checkTrialStatus(uid) {
-  db.collection("users").doc(uid).get().then((doc) => {
+// 5. Kiểm tra dùng thử 14 ngày & Cập nhật Mã định danh
+function checkTrialStatusDirect(username) {
+  db.collection("app_users").doc(username).get().then((doc) => {
     const authScreen = document.getElementById('authScreen');
     const registerSection = document.getElementById('registerSection');
     const lockScreen = document.getElementById('lockScreen');
     const mainAppContent = document.getElementById('mainAppContent');
     const userIdDisplay = document.getElementById('userIdDisplay');
+    
+    const settingUsername = document.getElementById('settingUsername');
+    const settingUniqueId = document.getElementById('settingUniqueId');
 
     if (authScreen) authScreen.style.display = 'none';
     if (registerSection) registerSection.style.display = 'none';
@@ -449,14 +393,19 @@ function checkTrialStatus(uid) {
       const createdAt = data.createdAt;
       const accountStatus = data.status;
 
+      // Cập nhật thông tin vào màn hình Khóa và phần Cài đặt
       if (userIdDisplay) userIdDisplay.innerText = uniqueId;
+      if (settingUsername) settingUsername.innerText = username;
+      if (settingUniqueId) settingUniqueId.innerText = uniqueId;
 
+      // Nếu tài khoản đã kích hoạt vĩnh viễn
       if (accountStatus === 'active') {
         if (lockScreen) lockScreen.style.display = 'none';
         if (mainAppContent) mainAppContent.style.display = 'block';
         return;
       }
 
+      // Kiểm tra 14 ngày (14 * 24 * 60 * 60 * 1000 ms)
       const now = new Date().getTime();
       const fourteenDays = 14 * 24 * 60 * 60 * 1000;
 

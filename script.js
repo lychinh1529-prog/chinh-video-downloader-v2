@@ -409,3 +409,123 @@ document.addEventListener("DOMContentLoaded", () => {
 
   console.log("Chinh Video Downloader đã khởi tạo.");
 });
+// --- CẤU HÌNH VÀ XỬ LÝ FIREBASE AUTH & TRIAL ---
+const firebaseConfig = {
+  apiKey: "AIzaSyAcn-F8s2qD0EpcRjwLgF2bsHvwK-ibAc",
+  authDomain: "chinh-video.firebaseapp.com",
+  projectId: "chinh-video",
+  storageBucket: "chinh-video.appspot.com",
+  messagingSenderId: "292692951758",
+  appId: "1:292692951758:web:5e35d1ff4e61c8b634869f",
+  measurementId: "G-T6EMG9SDLN"
+};
+
+// Khởi tạo Firebase nếu chưa có
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// Theo dõi trạng thái tài khoản
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    document.getElementById('authScreen').style.display = 'none';
+    checkTrialStatus(user.uid);
+  } else {
+    document.getElementById('authScreen').style.display = 'flex';
+    document.getElementById('lockScreen').style.display = 'none';
+    document.getElementById('mainAppContent').style.display = 'none';
+  }
+});
+
+// Đăng ký tài khoản mới + cấp mã VN-xxxxxx
+function handleSignup() {
+  const email = document.getElementById('authEmail').value;
+  const password = document.getElementById('authPassword').value;
+
+  if (!email || !password) {
+    document.getElementById('authMessage').innerText = "Vui lòng nhập đầy đủ Gmail và mật khẩu!";
+    return;
+  }
+
+  auth.createUserWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+      const user = userCredential.user;
+      const uniqueId = 'VN-' + Math.floor(100000 + Math.random() * 900000);
+      const currentTime = new Date().getTime();
+
+      db.collection("users").doc(user.uid).set({
+        email: email,
+        uniqueId: uniqueId,
+        createdAt: currentTime,
+        status: "trial"
+      }).then(() => {
+        alert("Tạo tài khoản thành công! Mã định danh của bạn là: " + uniqueId);
+      });
+    })
+    .catch((error) => {
+      document.getElementById('authMessage').innerText = "Lỗi: " + error.message;
+    });
+}
+
+// Đăng nhập
+function handleLogin() {
+  const email = document.getElementById('authEmail').value;
+  const password = document.getElementById('authPassword').value;
+
+  if (!email || !password) {
+    document.getElementById('authMessage').innerText = "Vui lòng nhập email và mật khẩu!";
+    return;
+  }
+
+  auth.signInWithEmailAndPassword(email, password)
+    .catch((error) => {
+      document.getElementById('authMessage').innerText = "Sai tài khoản hoặc mật khẩu!";
+    });
+}
+
+// Đăng xuất
+function handleLogout() {
+  auth.signOut();
+}
+
+// Kiểm tra thời hạn 14 ngày
+function checkTrialStatus(uid) {
+  db.collection("users").doc(uid).get().then((doc) => {
+    if (doc.exists) {
+      const data = doc.data();
+      const uniqueId = data.uniqueId || "VN-151120";
+      const createdAt = data.createdAt;
+      const accountStatus = data.status; // 'trial' hoặc 'active'
+
+      document.getElementById('userIdDisplay').innerText = uniqueId;
+
+      if (accountStatus === 'active') {
+        document.getElementById('lockScreen').style.display = 'none';
+        document.getElementById('mainAppContent').style.display = 'block';
+        return;
+      }
+
+      const now = new Date().getTime();
+      const fourteenDays = 14 * 24 * 60 * 60 * 1000;
+
+      if (now - createdAt > fourteenDays) {
+        document.getElementById('lockScreen').style.display = 'flex';
+        document.getElementById('mainAppContent').style.display = 'none';
+      } else {
+        document.getElementById('lockScreen').style.display = 'none';
+        document.getElementById('mainAppContent').style.display = 'block';
+      }
+    }
+  });
+}
+
+// Sao chép mã định danh
+function copyUserId() {
+  const userIdText = document.getElementById("userIdDisplay").innerText;
+  navigator.clipboard.writeText(userIdText).then(() => {
+    alert("Đã sao chép mã định danh: " + userIdText);
+  });
+}
+

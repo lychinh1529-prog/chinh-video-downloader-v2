@@ -173,6 +173,47 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  /* ========================================
+     XỬ LÝ SỰ KIỆN TẢI XUỐNG (THÊM MỚI)
+  ======================================== */
+  if (downloadBtn) {
+    downloadBtn.addEventListener("click", async () => {
+      const urlValue = videoUrl ? videoUrl.value.trim() : "";
+      if (!urlValue) {
+        showStatus("Vui lòng nhập hoặc dán liên kết video hợp lệ!", "error");
+        return;
+      }
+
+      const platform = selectedPlatform || detectPlatform(urlValue);
+      if (!platform) {
+        showStatus("Không nhận diện được nền tảng video. Vui lòng kiểm tra lại đường dẫn!", "error");
+        return;
+      }
+
+      // Hiển thị trạng thái đang xử lý
+      downloadBtn.disabled = true;
+      showStatus(`Đang kết nối máy chủ để trích xuất video từ ${platform}...`, "info");
+
+      try {
+        // Giả lập quá trình gọi API xử lý tải xuống (Bạn có thể thay thế bằng API fetch backend thực tế của bạn ở đây)
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        showStatus(`Trích xuất video từ ${platform} thành công! Đang chuẩn bị tải xuống...`, "success");
+        
+        // Tạo liên kết tải xuống mẫu hoặc kích hoạt hành động tải
+        setTimeout(() => {
+          showStatus("Tải xuống hoàn tất!", "success");
+          downloadBtn.disabled = false;
+        }, 1500);
+
+      } catch (error) {
+        console.error("Lỗi tải xuống:", error);
+        showStatus("Có lỗi xảy ra trong quá trình tải xuống. Vui lòng thử lại sau!", "error");
+        downloadBtn.disabled = false;
+      }
+    });
+  }
+
   function openSection(target) {
     const targetSection = document.getElementById(target);
     if (!targetSection) return;
@@ -237,7 +278,8 @@ document.addEventListener("DOMContentLoaded", () => {
   if (savedUsername) {
     checkTrialStatusDirect(savedUsername);
   } else {
-    document.getElementById('authScreen').style.display = 'flex';
+    const authScreen = document.getElementById('authScreen');
+    if (authScreen) authScreen.style.display = 'flex';
   }
 });
 
@@ -255,7 +297,6 @@ function handleSignup() {
     return;
   }
 
-  // Kiểm tra tên tài khoản đã trùng chưa
   const userRef = db.collection("app_users").doc(username);
 
   userRef.get().then((doc) => {
@@ -265,12 +306,10 @@ function handleSignup() {
         msgElement.innerText = "Tên tài khoản này đã tồn tại! Vui lòng chọn tên khác.";
       }
     } else {
-      // Sinh mã định danh VN-xxxxxx (6 chữ số ngẫu nhiên)
       const randomCode = Math.floor(100000 + Math.random() * 900000);
       const uniqueId = 'VN-' + randomCode;
       const currentTime = new Date().getTime();
 
-      // Lưu tài khoản vào database
       userRef.set({
         username: username,
         password: password,
@@ -278,7 +317,6 @@ function handleSignup() {
         createdAt: currentTime,
         status: "trial"
       }).then(() => {
-        // Tự động lưu đăng nhập
         localStorage.setItem("chinh_username", username);
         alert("Tạo tài khoản thành công! Mã định danh của bạn: " + uniqueId);
         checkTrialStatusDirect(username);
@@ -307,7 +345,6 @@ function handleLogin() {
     if (doc.exists) {
       const userData = doc.data();
       if (userData.password === password) {
-        // Lưu phiên đăng nhập
         localStorage.setItem("chinh_username", username);
         checkTrialStatusDirect(username);
       } else {
@@ -393,19 +430,16 @@ function checkTrialStatusDirect(username) {
       const createdAt = data.createdAt;
       const accountStatus = data.status;
 
-      // Cập nhật thông tin vào màn hình Khóa và phần Cài đặt
       if (userIdDisplay) userIdDisplay.innerText = uniqueId;
       if (settingUsername) settingUsername.innerText = username;
       if (settingUniqueId) settingUniqueId.innerText = uniqueId;
 
-      // Nếu tài khoản đã kích hoạt vĩnh viễn
       if (accountStatus === 'active') {
         if (lockScreen) lockScreen.style.display = 'none';
         if (mainAppContent) mainAppContent.style.display = 'block';
         return;
       }
 
-      // Kiểm tra 14 ngày (14 * 24 * 60 * 60 * 1000 ms)
       const now = new Date().getTime();
       const fourteenDays = 14 * 24 * 60 * 60 * 1000;
 
@@ -426,4 +460,4 @@ function copyUserId() {
   navigator.clipboard.writeText(userIdText).then(() => {
     alert("Đã sao chép mã định danh: " + userIdText);
   });
-}
+       }

@@ -415,12 +415,12 @@ document.addEventListener("DOMContentLoaded", () => {
    CẤU HÌNH VÀ XỬ LÝ FIREBASE AUTH & TRIAL
 ======================================== */
 const firebaseConfig = {
-  apiKey: "AIzaSyAcn-F8s2qD0EpcRjwLgF2bsHvwK-ibAc",
+  apiKey: "AIzaSy4cm_F8s2qD0EpcRjwgLFg2bsHvwK-ibAc",
   authDomain: "chinh-video.firebaseapp.com",
   projectId: "chinh-video",
-  storageBucket: "chinh-video.appspot.com",
+  storageBucket: "chinh-video.firebasestorage.app",
   messagingSenderId: "292692951758",
-  appId: "1:292692951758:web:5e35d1ff4e61c8b634869f",
+  appId: "1:292692951758:web:5e35d1ff4e61c8b634069f",
   measurementId: "G-T6EMG9SDLN"
 };
 
@@ -556,5 +556,5 @@ function copyUserId() {
   navigator.clipboard.writeText(userIdText).then(() => {
     alert("Đã sao chép mã định danh: " + userIdText);
   });
-           }
-                       
+       }
+           

@@ -17,8 +17,8 @@
 
 <body>
 
-  <!-- ================= MÀN HÌNH ĐĂNG NHẬP / ĐĂNG KÝ ================= -->
-  <div id="authScreen" class="auth-overlay" style="display: none;">
+  <!-- ================= MÀN HÌNH ĐĂNG NHẬP ================= -->
+  <div id="authScreen" class="auth-overlay" style="display: flex;">
     <div class="auth-card">
       <h2>CHINH VIDEO DOWNLOADER</h2>
       <p class="auth-subtitle">Đăng nhập tài khoản của bạn</p>
@@ -26,14 +26,45 @@
       <div class="input-group" style="margin-bottom: 15px;">
         <input type="email" id="authEmail" placeholder="Nhập địa chỉ Gmail..." style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;" />
       </div>
-      <div class="input-group" style="margin-bottom: 20px;">
-        <input type="password" id="authPassword" placeholder="Nhập mật khẩu..." style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;" />
+      
+      <!-- Ô mật khẩu có icon con mắt -->
+      <div class="input-group" style="margin-bottom: 10px; position: relative;">
+        <input type="password" id="authPassword" placeholder="Nhập mật khẩu..." style="width: 100%; padding: 12px; padding-right: 45px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;" />
+        <span id="eyeIcon" onclick="togglePasswordVisibility('authPassword', 'eyeIcon')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 18px;">👁️</span>
+      </div>
+
+      <!-- Nút Quên mật khẩu -->
+      <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
+        <button type="button" onclick="handleForgotPassword()" style="background: none; border: none; color: #075de0; cursor: pointer; font-size: 14px; padding: 0;">Quên mật khẩu?</button>
       </div>
 
       <button class="btn btn-primary full-width" onclick="handleLogin()" style="margin-bottom: 10px; width: 100%; padding: 12px;">Đăng nhập</button>
-      <button class="btn btn-light full-width" onclick="handleSignup()" style="width: 100%; padding: 12px;">Tạo tài khoản mới</button>
+      <button class="btn btn-light full-width" onclick="showAuthSection('register')" style="width: 100%; padding: 12px;">Tạo tài khoản mới</button>
       
       <p id="authMessage" class="auth-msg" style="color: #e53e3e; text-align: center; margin-top: 15px; font-size: 14px;"></p>
+    </div>
+  </div>
+
+  <!-- ================= MÀN HÌNH ĐĂNG KÝ (TRANG RIÊNG) ================= -->
+  <div id="registerSection" class="auth-overlay" style="display: none;">
+    <div class="auth-card">
+      <h2>CHINH VIDEO DOWNLOADER</h2>
+      <p class="auth-subtitle">Tạo tài khoản mới của bạn</p>
+
+      <div class="input-group" style="margin-bottom: 15px;">
+        <input type="email" id="regEmail" placeholder="Nhập địa chỉ Gmail..." style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;" />
+      </div>
+      
+      <!-- Ô mật khẩu đăng ký có icon con mắt -->
+      <div class="input-group" style="margin-bottom: 20px; position: relative;">
+        <input type="password" id="regPassword" placeholder="Tạo mật khẩu..." style="width: 100%; padding: 12px; padding-right: 45px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;" />
+        <span id="regEyeIcon" onclick="togglePasswordVisibility('regPassword', 'regEyeIcon')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 18px;">👁️</span>
+      </div>
+
+      <button class="btn btn-primary full-width" onclick="handleSignup()" style="margin-bottom: 10px; width: 100%; padding: 12px;">Đăng ký tài khoản</button>
+      <button class="btn btn-light full-width" onclick="showAuthSection('login')" style="width: 100%; padding: 12px;">Quay lại Đăng nhập</button>
+      
+      <p id="regMessage" class="auth-msg" style="text-align: center; margin-top: 15px; font-size: 14px;"></p>
     </div>
   </div>
 

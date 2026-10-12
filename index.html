@@ -7,9 +7,8 @@
   <meta name="description" content="Chinh Video Downloader - công cụ hỗ trợ tải video từ YouTube, Douyin, Bilibili và TikTok.">
   <title>Chinh Video Downloader</title>
   
-  <!-- Nhúng thư viện Firebase SDK -->
+  <!-- SDK Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
   <link rel="stylesheet" href="style.css">
@@ -21,19 +20,17 @@
   <div id="authScreen" class="auth-overlay" style="display: flex;">
     <div class="auth-card">
       <h2>CHINH VIDEO DOWNLOADER</h2>
-      <p class="auth-subtitle">Đăng nhập tài khoản của bạn</p>
+      <p class="auth-subtitle">Đăng nhập tài khoản</p>
 
       <div class="input-group" style="margin-bottom: 15px;">
-        <input type="email" id="authEmail" placeholder="Nhập địa chỉ Gmail..." style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;" />
+        <input type="text" id="authUsername" placeholder="Nhập tên tài khoản (ID)..." style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;" />
       </div>
       
-      <!-- Ô nhập mật khẩu có con mắt che/hiện -->
       <div class="input-group" style="margin-bottom: 10px; position: relative;">
         <input type="password" id="authPassword" placeholder="Nhập mật khẩu..." style="width: 100%; padding: 12px; padding-right: 45px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;" />
         <span id="eyeIcon" onclick="togglePasswordVisibility('authPassword', 'eyeIcon')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 18px;">👁️</span>
       </div>
 
-      <!-- Nút Quên mật khẩu -->
       <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
         <button type="button" onclick="handleForgotPassword()" style="background: none; border: none; color: #075de0; cursor: pointer; font-size: 14px; padding: 0;">Quên mật khẩu?</button>
       </div>
@@ -45,37 +42,24 @@
     </div>
   </div>
 
-  <!-- ================= MÀN HÌNH ĐĂNG KÝ VÀ XÁC MINH (TRANG RIÊNG) ================= -->
+  <!-- ================= MÀN HÌNH ĐĂNG KÝ ================= -->
   <div id="registerSection" class="auth-overlay" style="display: none;">
     <div class="auth-card">
       <h2>CHINH VIDEO DOWNLOADER</h2>
+      <p class="auth-subtitle">Tạo tài khoản mới</p>
+
+      <div class="input-group" style="margin-bottom: 15px;">
+        <input type="text" id="regUsername" placeholder="Tạo tên tài khoản (ID không trùng)..." style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;" />
+      </div>
       
-      <!-- Bước 1: Nhập thông tin tạo tài khoản -->
-      <div id="registerFormDiv">
-        <p class="auth-subtitle">Tạo tài khoản mới của bạn</p>
-
-        <div class="input-group" style="margin-bottom: 15px;">
-          <input type="email" id="regEmail" placeholder="Nhập địa chỉ Gmail..." style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;" />
-        </div>
-        
-        <div class="input-group" style="margin-bottom: 20px; position: relative;">
-          <input type="password" id="regPassword" placeholder="Tạo mật khẩu..." style="width: 100%; padding: 12px; padding-right: 45px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;" />
-          <span id="regEyeIcon" onclick="togglePasswordVisibility('regPassword', 'regEyeIcon')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 18px;">👁️</span>
-        </div>
-
-        <button class="btn btn-primary full-width" onclick="handleSignup()" style="margin-bottom: 10px; width: 100%; padding: 12px;">Đăng ký & Gửi mã xác minh</button>
-        <button class="btn btn-light full-width" onclick="showAuthSection('login')" style="width: 100%; padding: 12px;">Quay lại Đăng nhập</button>
+      <div class="input-group" style="margin-bottom: 20px; position: relative;">
+        <input type="password" id="regPassword" placeholder="Tạo mật khẩu..." style="width: 100%; padding: 12px; padding-right: 45px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;" />
+        <span id="regEyeIcon" onclick="togglePasswordVisibility('regPassword', 'regEyeIcon')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 18px;">👁️</span>
       </div>
 
-      <!-- Bước 2: Chờ người dùng xác minh email trong Gmail -->
-      <div id="verifyEmailDiv" style="display: none; text-align: center;">
-        <p class="auth-subtitle" style="color: #168344; font-weight: bold;">Đã gửi thư xác minh thành công!</p>
-        <p style="font-size: 14px; color: #555; margin: 15px 0;">Vui lòng mở hộp thư Gmail của bạn và nhấp vào liên kết xác nhận. Sau khi bấm xong, hãy ấn nút dưới đây để vào trang chủ.</p>
-        
-        <button class="btn btn-primary full-width" onclick="checkEmailVerificationStatus()" style="margin-bottom: 10px; width: 100%; padding: 12px; background: #168344;">✓ Tôi đã xác minh, vào trang chủ</button>
-        <button class="btn btn-light full-width" onclick="showAuthSection('login')" style="width: 100%; padding: 12px;">Quay lại Đăng nhập</button>
-      </div>
-
+      <button class="btn btn-primary full-width" onclick="handleSignup()" style="margin-bottom: 10px; width: 100%; padding: 12px;">Tạo tài khoản</button>
+      <button class="btn btn-light full-width" onclick="showAuthSection('login')" style="width: 100%; padding: 12px;">Quay lại Đăng nhập</button>
+      
       <p id="regMessage" class="auth-msg" style="text-align: center; margin-top: 15px; font-size: 14px;"></p>
     </div>
   </div>
@@ -111,7 +95,6 @@
         </div>
       </div>
 
-      <!-- Khung Cảnh báo -->
       <div class="alert-card">
         <div class="alert-icon">⚠️</div>
         <div class="alert-content">
@@ -120,7 +103,6 @@
         </div>
       </div>
 
-      <!-- Khung Liên hệ TikTok -->
       <div class="contact-card">
         <div class="contact-header">
           <span>💬</span>
@@ -333,35 +315,25 @@
           </div>
 
           <div class="card">
-            <h3>Thông tin ứng dụng</h3>
+            <h3>Thông tin tài khoản</h3>
 
             <div class="setting-row">
               <div>
-                <p>Tên ứng dụng</p>
-                <small>Chinh Video Downloader</small>
+                <p>Tên tài khoản (ID)</p>
+                <small id="settingUsername">--</small>
               </div>
             </div>
 
             <div class="setting-row">
               <div>
-                <p>Nền tảng hỗ trợ</p>
-                <small>YouTube · Douyin · Bilibili · TikTok</small>
-              </div>
-            </div>
-
-            <div class="setting-row">
-              <div>
-                <p>Phiên bản giao diện</p>
-                <small>Preview 2.0 (Cloud Authenticated)</small>
+                <p>Mã định danh ứng dụng</p>
+                <small id="settingUniqueId" style="color: #075de0; font-weight: bold;">VN-......</small>
               </div>
             </div>
           </div>
 
           <div class="card">
             <h3>Tài khoản & Bảo mật</h3>
-            <p class="description" style="margin-bottom: 15px;">
-              Hệ thống đã kết nối cơ sở dữ liệu đám mây Firebase để quản lý thời hạn dùng thử và mã định danh.
-            </p>
             <button class="btn btn-primary full-width" onclick="handleLogout()" style="background: #e53e3e;">Đăng xuất tài khoản</button>
           </div>
         </section>
@@ -388,11 +360,6 @@
             <p class="description">
               Website sẽ nhận diện tên nền tảng dựa trên đường dẫn.
             </p>
-
-            <h3>04 · Chờ tích hợp tải video</h3>
-            <p class="description">
-              Tính năng tải video thực tế chưa được kết nối API trong phiên bản này.
-            </p>
           </div>
         </section>
       </main>
@@ -417,7 +384,6 @@
     </nav>
   </div>
 
-  <!-- Tệp JavaScript điều khiển logic app -->
   <script src="script.js"></script>
 </body>
 </html>

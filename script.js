@@ -233,7 +233,6 @@ const firebaseConfig = {
   measurementId: "G-T6EMG9SDLN"
 };
 
-// Khởi tạo Firebase nếu chưa có
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
@@ -243,20 +242,38 @@ const db = firebase.firestore();
 // Theo dõi trạng thái tài khoản đăng nhập
 auth.onAuthStateChanged((user) => {
   const authScreen = document.getElementById('authScreen');
+  const registerSection = document.getElementById('registerSection');
   const lockScreen = document.getElementById('lockScreen');
   const mainAppContent = document.getElementById('mainAppContent');
 
   if (user) {
-    if (authScreen) authScreen.style.display = 'none';
-    checkTrialStatus(user.uid);
+    // Kiểm tra xem đã xác minh email chưa trước khi cho vào trang chủ
+    user.reload().then(() => {
+      if (user.emailVerified) {
+        if (authScreen) authScreen.style.display = 'none';
+        if (registerSection) registerSection.style.display = 'none';
+        checkTrialStatus(user.uid);
+      } else {
+        // Chưa xác minh thì hiển thị màn hình chờ xác minh
+        if (authScreen) authScreen.style.display = 'none';
+        if (registerSection) {
+          registerSection.style.display = 'flex';
+          document.getElementById('registerFormDiv').style.display = 'none';
+          document.getElementById('verifyEmailDiv').style.display = 'block';
+        }
+        if (lockScreen) lockScreen.style.display = 'none';
+        if (mainAppContent) mainAppContent.style.display = 'none';
+      }
+    });
   } else {
     if (authScreen) authScreen.style.display = 'flex';
+    if (registerSection) registerSection.style.display = 'none';
     if (lockScreen) lockScreen.style.display = 'none';
     if (mainAppContent) mainAppContent.style.display = 'none';
   }
 });
 
-// 1. Đăng ký tài khoản mới (ở trang đăng ký riêng)
+// 1. Đăng ký tài khoản mới + Gửi email xác minh
 function handleSignup() {
   const email = document.getElementById('regEmail').value.trim();
   const password = document.getElementById('regPassword').value;
@@ -270,6 +287,7 @@ function handleSignup() {
   auth.createUserWithEmailAndPassword(email, password)
     .then((userCredential) => {
       const user = userCredential.user;
+      
       user.sendEmailVerification().then(() => {
         const uniqueId = 'VN-' + Math.floor(100000 + Math.random() * 900000);
         const currentTime = new Date().getTime();
@@ -280,10 +298,10 @@ function handleSignup() {
           createdAt: currentTime,
           status: "trial"
         }).then(() => {
-          if (msgElement) {
-            msgElement.style.color = "#168344";
-            msgElement.innerText = "Đăng ký thành công! Đã gửi email xác minh. Mã ID: " + uniqueId;
-          }
+          // Chuyển sang giao diện thông báo chờ xác minh
+          document.getElementById('registerFormDiv').style.display = 'none';
+          document.getElementById('verifyEmailDiv').style.display = 'block';
+          if (msgElement) msgElement.innerText = "";
         });
       });
     })
@@ -293,6 +311,26 @@ function handleSignup() {
         msgElement.innerText = "Lỗi: " + error.message;
       }
     });
+}
+
+// Kiểm tra khi người dùng bấm nút "Tôi đã xác minh"
+function checkEmailVerificationStatus() {
+  const user = auth.currentUser;
+  const msgElement = document.getElementById('regMessage');
+
+  if (user) {
+    user.reload().then(() => {
+      if (user.emailVerified) {
+        alert("Xác minh thành công! Chào mừng bạn đến với trang chủ.");
+        checkTrialStatus(user.uid);
+      } else {
+        if (msgElement) {
+          msgElement.style.color = "#d92d3a";
+          msgElement.innerText = "Bạn chưa bấm vào đường dẫn xác minh trong email! Vui lòng kiểm tra lại hộp thư.";
+        }
+      }
+    });
+  }
 }
 
 // 2. Đăng nhập tài khoản
@@ -307,6 +345,18 @@ function handleLogin() {
   }
 
   auth.signInWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+      const user = userCredential.user;
+      user.reload().then(() => {
+        if (!user.emailVerified) {
+          auth.signOut();
+          if (msgElement) {
+            msgElement.style.color = "#d92d3a";
+            msgElement.innerText = "Tài khoản chưa xác minh email! Vui lòng kiểm tra hộp thư.";
+          }
+        }
+      });
+    })
     .catch((error) => {
       if (msgElement) {
         msgElement.style.color = "#d92d3a";
@@ -358,13 +408,22 @@ function togglePasswordVisibility(inputId, iconId) {
   }
 }
 
-// Chuyển đổi qua lại giữa các phần tử giao diện xác thực (Đăng nhập / Đăng ký)
+// Chuyển đổi qua lại giữa màn hình Đăng nhập và Đăng ký
 function showAuthSection(sectionId) {
   const loginSection = document.getElementById('authScreen');
   const registerSection = document.getElementById('registerSection');
-
-  if (loginSection) loginSection.style.display = (sectionId === 'login') ? 'flex' : 'none';
-  if (registerSection) registerSection.style.display = (sectionId === 'register') ? 'flex' : 'none';
+  
+  if (sectionId === 'register') {
+    if (loginSection) loginSection.style.display = 'none';
+    if (registerSection) {
+      registerSection.style.display = 'flex';
+      document.getElementById('registerFormDiv').style.display = 'block';
+      document.getElementById('verifyEmailDiv').style.display = 'none';
+    }
+  } else {
+    if (loginSection) loginSection.style.display = 'flex';
+    if (registerSection) registerSection.style.display = 'none';
+  }
 }
 
 // Đăng xuất tài khoản
@@ -375,9 +434,14 @@ function handleLogout() {
 // Kiểm tra thời hạn dùng thử 14 ngày
 function checkTrialStatus(uid) {
   db.collection("users").doc(uid).get().then((doc) => {
+    const authScreen = document.getElementById('authScreen');
+    const registerSection = document.getElementById('registerSection');
     const lockScreen = document.getElementById('lockScreen');
     const mainAppContent = document.getElementById('mainAppContent');
     const userIdDisplay = document.getElementById('userIdDisplay');
+
+    if (authScreen) authScreen.style.display = 'none';
+    if (registerSection) registerSection.style.display = 'none';
 
     if (doc.exists) {
       const data = doc.data();
@@ -414,4 +478,3 @@ function copyUserId() {
     alert("Đã sao chép mã định danh: " + userIdText);
   });
 }
-

@@ -1,0 +1,195 @@
+const urlInput = document.getElementById("videoUrl");
+const charCount = document.getElementById("charCount");
+const clearBtn = document.getElementById("clearBtn");
+const pasteBtn = document.getElementById("pasteBtn");
+const downloadBtn = document.getElementById("downloadBtn");
+const statusBox = document.getElementById("statusBox");
+const platformName = document.getElementById("platformName");
+const navButtons = document.querySelectorAll(".nav-btn");
+const sections = document.querySelectorAll(".section");
+
+const MAX_LENGTH = 500;
+
+function showStatus(message) {
+  if (!statusBox) return;
+  statusBox.textContent = message;
+  statusBox.classList.add("show");
+}
+
+function detectPlatform(value) {
+  const url = value.trim().toLowerCase();
+
+  if (!url) return "";
+
+  if (
+    url.includes("youtube.com") ||
+    url.includes("youtu.be")
+  ) return "YouTube";
+
+  if (
+    url.includes("douyin.com") ||
+    url.includes("iesdouyin.com")
+  ) return "Douyin";
+
+  if (
+    url.includes("bilibili.com") ||
+    url.includes("b23.tv")
+  ) return "Bilibili";
+
+  if (
+    url.includes("tiktok.com") ||
+    url.includes("vt.tiktok.com") ||
+    url.includes("vm.tiktok.com")
+  ) return "TikTok";
+
+  return "Không xác định";
+}
+
+function updateInput() {
+  if (!urlInput) return;
+
+  const length = urlInput.value.length;
+
+  if (charCount) {
+    charCount.textContent = `${length}/${MAX_LENGTH}`;
+    charCount.classList.toggle("warning", length >= MAX_LENGTH);
+  }
+
+  urlInput.classList.toggle("invalid", length > MAX_LENGTH);
+
+  if (platformName) {
+    const platform = detectPlatform(urlInput.value);
+    platformName.textContent = platform
+      ? `Nền tảng: ${platform}`
+      : "Nền tảng: Chưa xác định";
+  }
+
+  if (downloadBtn) {
+    downloadBtn.disabled =
+      !urlInput.value.trim() ||
+      length > MAX_LENGTH;
+  }
+}
+
+if (urlInput) {
+  urlInput.addEventListener("input", updateInput);
+
+  // Chặn nội dung vượt quá 500 ký tự khi nhập hoặc dán.
+  urlInput.addEventListener("paste", function (event) {
+    const pastedText =
+      (event.clipboardData || window.clipboardData)
+        .getData("text");
+
+    const currentLength = urlInput.value.length;
+    const selectedLength =
+      urlInput.selectionEnd - urlInput.selectionStart;
+
+    if (
+      currentLength - selectedLength + pastedText.length >
+      MAX_LENGTH
+    ) {
+      event.preventDefault();
+
+      const available =
+        MAX_LENGTH - (currentLength - selectedLength);
+
+      const insertText = pastedText.slice(
+        0,
+        Math.max(0, available)
+      );
+
+      const start = urlInput.selectionStart;
+      const end = urlInput.selectionEnd;
+
+      urlInput.setRangeText(insertText, start, end, "end");
+      updateInput();
+      showStatus("Đã giới hạn nội dung ở 500 ký tự.");
+    }
+  });
+}
+
+if (clearBtn && urlInput) {
+  clearBtn.addEventListener("click", function () {
+    urlInput.value = "";
+    updateInput();
+    if (statusBox) statusBox.classList.remove("show");
+    urlInput.focus();
+  });
+}
+
+if (pasteBtn && urlInput) {
+  pasteBtn.addEventListener("click", async function () {
+    try {
+      const text = await navigator.clipboard.readText();
+
+      urlInput.value = text.slice(0, MAX_LENGTH);
+      updateInput();
+
+      if (text.length > MAX_LENGTH) {
+        showStatus("Nội dung quá dài nên chỉ lấy 500 ký tự đầu.");
+      } else {
+        showStatus("Đã dán nội dung từ bộ nhớ tạm.");
+      }
+    } catch (error) {
+      showStatus(
+        "Không thể tự đọc bộ nhớ tạm. Hãy nhấn giữ ô nhập rồi chọn Dán."
+      );
+    }
+  });
+}
+
+if (downloadBtn && urlInput) {
+  downloadBtn.addEventListener("click", function () {
+    const value = urlInput.value.trim();
+
+    if (!value) {
+      showStatus("Hãy dán liên kết video trước.");
+      return;
+    }
+
+    if (value.length > MAX_LENGTH) {
+      showStatus("Liên kết không được vượt quá 500 ký tự.");
+      return;
+    }
+
+    const platform = detectPlatform(value);
+
+    if (
+      platform === "Không xác định" ||
+      !platform
+    ) {
+      showStatus(
+        "Liên kết chưa được nhận diện. Hãy kiểm tra lại URL YouTube, Douyin, Bilibili hoặc TikTok."
+      );
+      return;
+    }
+
+    showStatus(
+      `Đã nhận diện ${platform}. Chức năng xử lý và tải video cần tích hợp API ở bước tiếp theo.`
+    );
+  });
+}
+
+navButtons.forEach(function (button) {
+  button.addEventListener("click", function () {
+    const target = button.dataset.target;
+
+    navButtons.forEach(function (item) {
+      item.classList.toggle("active", item === button);
+    });
+
+    sections.forEach(function (section) {
+      section.classList.toggle(
+        "active",
+        section.id === target
+      );
+    });
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  });
+});
+
+updateInput();

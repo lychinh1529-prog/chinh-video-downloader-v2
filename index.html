@@ -27,7 +27,7 @@
         <input type="email" id="authEmail" placeholder="Nhập địa chỉ Gmail..." style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;" />
       </div>
       
-      <!-- Ô mật khẩu có icon con mắt -->
+      <!-- Ô nhập mật khẩu có con mắt che/hiện -->
       <div class="input-group" style="margin-bottom: 10px; position: relative;">
         <input type="password" id="authPassword" placeholder="Nhập mật khẩu..." style="width: 100%; padding: 12px; padding-right: 45px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;" />
         <span id="eyeIcon" onclick="togglePasswordVisibility('authPassword', 'eyeIcon')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 18px;">👁️</span>
@@ -45,25 +45,37 @@
     </div>
   </div>
 
-  <!-- ================= MÀN HÌNH ĐĂNG KÝ (TRANG RIÊNG) ================= -->
+  <!-- ================= MÀN HÌNH ĐĂNG KÝ VÀ XÁC MINH (TRANG RIÊNG) ================= -->
   <div id="registerSection" class="auth-overlay" style="display: none;">
     <div class="auth-card">
       <h2>CHINH VIDEO DOWNLOADER</h2>
-      <p class="auth-subtitle">Tạo tài khoản mới của bạn</p>
-
-      <div class="input-group" style="margin-bottom: 15px;">
-        <input type="email" id="regEmail" placeholder="Nhập địa chỉ Gmail..." style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;" />
-      </div>
       
-      <!-- Ô mật khẩu đăng ký có icon con mắt -->
-      <div class="input-group" style="margin-bottom: 20px; position: relative;">
-        <input type="password" id="regPassword" placeholder="Tạo mật khẩu..." style="width: 100%; padding: 12px; padding-right: 45px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;" />
-        <span id="regEyeIcon" onclick="togglePasswordVisibility('regPassword', 'regEyeIcon')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 18px;">👁️</span>
+      <!-- Bước 1: Nhập thông tin tạo tài khoản -->
+      <div id="registerFormDiv">
+        <p class="auth-subtitle">Tạo tài khoản mới của bạn</p>
+
+        <div class="input-group" style="margin-bottom: 15px;">
+          <input type="email" id="regEmail" placeholder="Nhập địa chỉ Gmail..." style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;" />
+        </div>
+        
+        <div class="input-group" style="margin-bottom: 20px; position: relative;">
+          <input type="password" id="regPassword" placeholder="Tạo mật khẩu..." style="width: 100%; padding: 12px; padding-right: 45px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;" />
+          <span id="regEyeIcon" onclick="togglePasswordVisibility('regPassword', 'regEyeIcon')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 18px;">👁️</span>
+        </div>
+
+        <button class="btn btn-primary full-width" onclick="handleSignup()" style="margin-bottom: 10px; width: 100%; padding: 12px;">Đăng ký & Gửi mã xác minh</button>
+        <button class="btn btn-light full-width" onclick="showAuthSection('login')" style="width: 100%; padding: 12px;">Quay lại Đăng nhập</button>
       </div>
 
-      <button class="btn btn-primary full-width" onclick="handleSignup()" style="margin-bottom: 10px; width: 100%; padding: 12px;">Đăng ký tài khoản</button>
-      <button class="btn btn-light full-width" onclick="showAuthSection('login')" style="width: 100%; padding: 12px;">Quay lại Đăng nhập</button>
-      
+      <!-- Bước 2: Chờ người dùng xác minh email trong Gmail -->
+      <div id="verifyEmailDiv" style="display: none; text-align: center;">
+        <p class="auth-subtitle" style="color: #168344; font-weight: bold;">Đã gửi thư xác minh thành công!</p>
+        <p style="font-size: 14px; color: #555; margin: 15px 0;">Vui lòng mở hộp thư Gmail của bạn và nhấp vào liên kết xác nhận. Sau khi bấm xong, hãy ấn nút dưới đây để vào trang chủ.</p>
+        
+        <button class="btn btn-primary full-width" onclick="checkEmailVerificationStatus()" style="margin-bottom: 10px; width: 100%; padding: 12px; background: #168344;">✓ Tôi đã xác minh, vào trang chủ</button>
+        <button class="btn btn-light full-width" onclick="showAuthSection('login')" style="width: 100%; padding: 12px;">Quay lại Đăng nhập</button>
+      </div>
+
       <p id="regMessage" class="auth-msg" style="text-align: center; margin-top: 15px; font-size: 14px;"></p>
     </div>
   </div>
@@ -129,7 +141,7 @@
   </div>
 
 
-  <!-- ================= NỘI DUNG ỨNG DỤNG CHÍNH (Được bọc trong thẻ này) ================= -->
+  <!-- ================= NỘI DUNG ỨNG DỤNG CHÍNH ================= -->
   <div id="mainAppContent" style="display: none;">
     <div class="app">
 

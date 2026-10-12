@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f4f8ff">
+  <meta name="description" content="Chinh Video Downloader - công cụ hỗ trợ tải video từ YouTube, Douyin, Bilibili và TikTok.">
+  <title>Chinh Video Downloader</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="app">
+
+    <header>
+      <div class="logo">▶</div>
+      <div>
+        <h1>CHINH <span>VIDEO</span></h1>
+        <p>Downloader</p>
+      </div>
+      <button class="header-settings" id="headerSettings" aria-label="Mở cài đặt">⚙</button>
+    </header>
+
+    <main>
+      <!-- TRANG CHỦ -->
+      <section class="section active" id="home">
+        <div class="hero">
+          <h2>
+            Tải video từ mọi nền tảng
+            <span>nhanh chóng và dễ dàng</span>
+          </h2>
+          <p>
+            Chinh Video Downloader giúp bạn xử lý liên kết video
+            từ YouTube, Douyin, Bilibili và TikTok ngay trên điện thoại.
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="platform-heading">
+            <div class="section-icon">▣</div>
+            <div>
+              <h3>Chọn nền tảng</h3>
+              <p class="muted">Nhận diện tự động từ liên kết</p>
+            </div>
+          </div>
+
+          <div class="platforms">
+            <div class="platform" data-platform="YouTube">
+              <span class="platform-icon">▶️</span>
+              <span>YouTube</span>
+            </div>
+
+            <div class="platform" data-platform="Douyin">
+              <span class="platform-icon">🎵</span>
+              <span>Douyin</span>
+            </div>
+
+            <div class="platform" data-platform="Bilibili">
+              <span class="platform-icon">📺</span>
+              <span>Bilibili</span>
+            </div>
+
+            <div class="platform" data-platform="TikTok">
+              <span class="platform-icon">🎶</span>
+              <span>TikTok</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="input-title">
+            <div class="section-icon">🔗</div>
+            <div>
+              <h3>Dán liên kết video</h3>
+              <p class="muted">Hỗ trợ 4 nền tảng · Tối đa 500 ký tự</p>
+            </div>
+          </div>
+
+          <textarea
+            id="videoUrl"
+            maxlength="500"
+            rows="3"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            placeholder="Dán liên kết video vào đây..."
+            aria-label="Liên kết video"
+          ></textarea>
+
+          <div class="input-info">
+            <span id="platformName">Nền tảng: Chưa xác định</span>
+            <span id="charCount">0/500</span>
+          </div>
+
+          <div class="actions">
+            <button class="btn btn-light" id="pasteBtn">▣ Dán liên kết</button>
+            <button class="btn" id="clearBtn">✕ Xóa</button>
+          </div>
+
+          <button class="btn btn-primary full-width download-main" id="downloadBtn" disabled>
+            ↓ &nbsp; Bắt đầu tải video &nbsp; →
+          </button>
+
+          <div class="status" id="statusBox" role="status" aria-live="polite"></div>
+
+          <div class="features">
+            <div class="feature">
+              <div class="feature-icon">ϟ</div>
+              <div>
+                <strong>Tải nhanh</strong>
+                <span>Giao diện gọn nhẹ</span>
+              </div>
+            </div>
+
+            <div class="feature">
+              <div class="feature-icon">◇</div>
+              <div>
+                <strong>Chất lượng cao</strong>
+                <span>Tùy theo nguồn video</span>
+              </div>
+            </div>
+
+            <div class="feature">
+              <div class="feature-icon">▣</div>
+              <div>
+                <strong>Đa nền tảng</strong>
+                <span>Hỗ trợ 4 dịch vụ</span>
+              </div>
+            </div>
+
+            <div class="feature">
+              <div class="feature-icon">✓</div>
+              <div>
+                <strong>Riêng tư</strong>
+                <span>Không có lịch sử tải trong giao diện</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="utilities">
+          <article class="utility">
+            <div class="utility-icon">↓</div>
+            <h3>Tải video</h3>
+            <p>Dán liên kết để chuẩn bị xử lý video.</p>
+            <button class="text-link" data-go="home">Bắt đầu ngay →</button>
+          </article>
+
+          <article class="utility">
+            <div class="utility-icon">✂</div>
+            <h3>Chỉnh sửa video</h3>
+            <p>Cắt ghép, thêm nhạc và chỉnh sửa video.</p>
+            <span class="coming-soon">Sắp ra mắt</span>
+          </article>
+
+          <article class="utility">
+            <div class="utility-icon">⚙</div>
+            <h3>Cài đặt</h3>
+            <p>Tùy chỉnh trải nghiệm sử dụng.</p>
+            <button class="text-link" data-go="settings">Đi đến cài đặt →</button>
+          </article>
+
+          <article class="utility">
+            <div class="utility-icon">ⓘ</div>
+            <h3>Hướng dẫn</h3>
+            <p>Xem cách sử dụng công cụ.</p>
+            <button class="text-link" data-go="help">Xem hướng dẫn →</button>
+          </article>
+        </div>
+
+        <footer>
+          CHINH VIDEO Downloader<br>
+          Chỉ sử dụng video khi bạn có quyền tải và sử dụng.
+        </footer>
+      </section>
+
+      <!-- TRÌNH CHỈNH SỬA -->
+      <section class="section" id="editor">
+        <div class="page-heading">
+          <h2>Chỉnh sửa video 🎬</h2>
+          <p>Công cụ chỉnh sửa video dành cho điện thoại Android.</p>
+        </div>
+
+        <div class="card">
+          <div class="utility-icon">✂</div>
+          <h3>Không gian sáng tạo của bạn</h3>
+          <p class="description">
+            Tính năng chỉnh sửa đang được chuẩn bị.
+            Khi hoàn thành, bạn có thể sử dụng các công cụ ngay trên điện thoại.
+          </p>
+          <span class="coming-soon">Sắp ra mắt</span>
+        </div>
+      </section>
+
+      <!-- CÀI ĐẶT -->
+      <section class="section" id="settings">
+        <div class="page-heading">
+          <h2>Cài đặt ⚙️</h2>
+          <p>Quản lý trải nghiệm sử dụng Chinh Video.</p>
+        </div>
+
+        <div class="card">
+          <h3>Thông tin ứng dụng</h3>
+
+          <div class="setting-row">
+            <div>
+              <p>Tên ứng dụng</p>
+              <small>Chinh Video Downloader</small>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div>
+              <p>Nền tảng hỗ trợ</p>
+              <small>YouTube · Douyin · Bilibili · TikTok</small>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div>
+              <p>Phiên bản giao diện</p>
+              <small>Preview 1.0</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Tài khoản</h3>
+          <p class="description">
+            Hệ thống đăng ký, xác minh email và quản lý thời hạn sử dụng
+            sẽ được tích hợp sau khi hoàn thiện backend.
+          </p>
+        </div>
+      </section>
+
+      <!-- HƯỚNG DẪN -->
+      <section class="section" id="help">
+        <div class="page-heading">
+          <h2>Hướng dẫn sử dụng</h2>
+          <p>Các bước sử dụng giao diện hiện tại.</p>
+        </div>
+
+        <div class="card">
+          <h3>01 · Sao chép liên kết</h3>
+          <p class="description">
+            Sao chép đường dẫn video từ nền tảng tương ứng.
+          </p>
+
+          <h3>02 · Dán liên kết</h3>
+          <p class="description">
+            Nhấn nút Dán liên kết hoặc chạm vào ô nhập để dán.
+          </p>
+
+          <h3>03 · Kiểm tra nền tảng</h3>
+          <p class="description">
+            Website sẽ nhận diện tên nền tảng dựa trên đường dẫn.
+          </p>
+
+          <h3>04 · Chờ tích hợp tải video</h3>
+          <p class="description">
+            Tính năng tải video thực tế chưa được kết nối API trong phiên bản này.
+          </p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- THANH ĐIỀU HƯỚNG ĐIỆN THOẠI -->
+  <nav class="bottom-nav" aria-label="Điều hướng chính">
+    <button class="nav-btn active" data-target="home">
+      <span>⌂</span>
+      Trang chủ
+    </button>
+
+    <button class="nav-btn" data-target="editor">
+      <span>✂</span>
+      Chỉnh sửa
+    </button>
+
+    <button class="nav-btn" data-target="settings">
+      <span>⚙</span>
+      Cài đặt
+    </button>
+  </nav>
+
+  <script src="script.js"></script>
+</body>
+</html>

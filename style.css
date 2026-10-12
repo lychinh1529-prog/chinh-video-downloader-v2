@@ -543,8 +543,8 @@ footer {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  right: 0;
+  bottom: 0;
   background: var(--bg);
   display: flex;
   justify-content: center;
@@ -563,6 +563,7 @@ footer {
   box-shadow: 0 10px 30px rgba(8, 123, 255, 0.12);
   width: 100%;
   max-width: 380px;
+  margin: auto;
   box-sizing: border-box;
   border: 1px solid var(--border);
 }
@@ -722,7 +723,7 @@ footer {
 }
 
 /* ==========================================================================
-   3. RESPONSIVE HOÀN THIỆN TÊN CÁC THIẾT BỊ DI ĐỘNG
+   3. RESPONSIVE HOÀN THIỆN TRÊN CÁC THIẾT BỊ DI ĐỘNG
    ========================================================================== */
 @media (min-width: 600px) {
   .app {

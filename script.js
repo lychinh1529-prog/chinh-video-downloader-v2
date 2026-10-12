@@ -30,54 +30,19 @@ document.addEventListener("DOMContentLoaded", () => {
   ======================================== */
 
   function detectPlatform(value) {
-    if (!value.trim()) {
-      return "";
-    }
-
+    if (!value.trim()) return "";
     let url;
-
     try {
       url = new URL(value.trim());
     } catch {
       return "";
     }
-
-    if (!["http:", "https:"].includes(url.protocol)) {
-      return "";
-    }
-
+    if (!["http:", "https:"].includes(url.protocol)) return "";
     const host = url.hostname.toLowerCase().replace(/^www\./, "");
-
-    if (
-      host === "youtube.com" ||
-      host.endsWith(".youtube.com") ||
-      host === "youtu.be"
-    ) {
-      return "YouTube";
-    }
-
-    if (
-      host === "douyin.com" ||
-      host.endsWith(".douyin.com")
-    ) {
-      return "Douyin";
-    }
-
-    if (
-      host === "bilibili.com" ||
-      host.endsWith(".bilibili.com") ||
-      host === "b23.tv"
-    ) {
-      return "Bilibili";
-    }
-
-    if (
-      host === "tiktok.com" ||
-      host.endsWith(".tiktok.com")
-    ) {
-      return "TikTok";
-    }
-
+    if (host === "youtube.com" || host.endsWith(".youtube.com") || host === "youtu.be") return "YouTube";
+    if (host === "douyin.com" || host.endsWith(".douyin.com")) return "Douyin";
+    if (host === "bilibili.com" || host.endsWith(".bilibili.com") || host === "b23.tv") return "Bilibili";
+    if (host === "tiktok.com" || host.endsWith(".tiktok.com")) return "TikTok";
     return "";
   }
 
@@ -87,10 +52,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function showStatus(message, type = "info") {
     if (!statusBox) return;
-
     statusBox.textContent = message;
     statusBox.className = "status";
-
     if (type === "error") {
       statusBox.style.background = "#fff0f0";
       statusBox.style.color = "#d92d3a";
@@ -105,74 +68,51 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function clearStatus() {
     if (!statusBox) return;
-
     statusBox.textContent = "";
     statusBox.className = "status";
     statusBox.removeAttribute("style");
   }
 
   /* ========================================
-     CẬP NHẬT THẺ NỀN TẢNG
+     CẬP NHẬT THẺ NỀN TẢNG & Ô NHẬP
   ======================================== */
 
   function updatePlatformCards(name) {
     platforms.forEach((item) => {
       const isActive = item.dataset.platform === name;
-
       item.classList.toggle("active", isActive);
       item.setAttribute("aria-pressed", String(isActive));
-      item.setAttribute("role", "button");
-      item.setAttribute("tabindex", "0");
     });
   }
 
   function updatePlatformName(name) {
     selectedPlatform = name;
-
     if (platformName) {
-      platformName.textContent = name
-        ? `Nền tảng: ${name}`
-        : "Nền tảng: Chưa xác định";
+      platformName.textContent = name ? `Nền tảng: ${name}` : "Nền tảng: Chưa xác định";
     }
-
     updatePlatformCards(name);
   }
 
-  /* ========================================
-     CẬP NHẬT Ô NHẬP
-  ======================================== */
-
   function updateInput() {
     if (!videoUrl) return;
-
     const value = videoUrl.value;
     const trimmedValue = value.trim();
 
     if (charCount) {
       charCount.textContent = `${value.length}/${MAX_LENGTH}`;
-
-      charCount.classList.toggle(
-        "warning",
-        value.length >= MAX_LENGTH * 0.9
-      );
+      charCount.classList.toggle("warning", value.length >= MAX_LENGTH * 0.9);
     }
-
     videoUrl.classList.remove("invalid");
 
     if (!trimmedValue) {
       updatePlatformName("");
       manualPlatform = false;
-
-      if (downloadBtn) {
-        downloadBtn.disabled = true;
-      }
-
+      if (downloadBtn) downloadBtn.disabled = true;
       clearStatus();
       return;
     }
 
     const detected = detectPlatform(trimmedValue);
-
     if (detected) {
       if (!manualPlatform || selectedPlatform === detected) {
         updatePlatformName(detected);
@@ -180,11 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       updatePlatformName("");
     }
-
-    if (downloadBtn) {
-      downloadBtn.disabled = false;
-    }
-
+    if (downloadBtn) downloadBtn.disabled = false;
     clearStatus();
   }
 
@@ -193,54 +129,24 @@ document.addEventListener("DOMContentLoaded", () => {
       manualPlatform = false;
       updateInput();
     });
-
     videoUrl.addEventListener("paste", () => {
       manualPlatform = false;
-
       setTimeout(updateInput, 0);
     });
   }
 
   /* ========================================
-     CHỌN NỀN TẢNG THỦ CÔNG
+     CHỌN NỀN TẢNG THỦ CÔNG & NÚT DÁN/XÓA
   ======================================== */
 
   platforms.forEach((item) => {
-    function selectPlatform() {
+    item.addEventListener("click", () => {
       const name = item.dataset.platform;
-
       if (!name) return;
-
       manualPlatform = true;
       updatePlatformName(name);
-
-      if (videoUrl && videoUrl.value.trim()) {
-        const detected = detectPlatform(videoUrl.value);
-
-        if (detected && detected !== name) {
-          showStatus(
-            `Liên kết này thuộc ${detected}, không phải ${name}.`,
-            "error"
-          );
-        } else {
-          clearStatus();
-        }
-      }
-    }
-
-    item.addEventListener("click", selectPlatform);
-
-    item.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        selectPlatform();
-      }
     });
   });
-
-  /* ========================================
-     NÚT XÓA
-  ======================================== */
 
   if (clearBtn) {
     clearBtn.addEventListener("click", () => {
@@ -249,112 +155,35 @@ document.addEventListener("DOMContentLoaded", () => {
         videoUrl.classList.remove("invalid");
         videoUrl.focus();
       }
-
       manualPlatform = false;
       updateInput();
     });
   }
 
-  /* ========================================
-     NÚT DÁN
-  ======================================== */
-
   if (pasteBtn) {
     pasteBtn.addEventListener("click", async () => {
       try {
-        if (!navigator.clipboard || !navigator.clipboard.readText) {
-          showStatus(
-            "Trình duyệt chưa cho phép đọc bộ nhớ tạm. Hãy chạm vào ô nhập và chọn Dán.",
-            "error"
-          );
-          return;
-        }
-
         const text = await navigator.clipboard.readText();
-
-        if (!text.trim()) {
-          showStatus("Bộ nhớ tạm đang trống.", "error");
-          return;
-        }
-
         if (videoUrl) {
           videoUrl.value = text.slice(0, MAX_LENGTH);
           manualPlatform = false;
           updateInput();
           videoUrl.focus();
-
-          if (text.length > MAX_LENGTH) {
-            showStatus(
-              "Liên kết quá dài. Nội dung đã được giới hạn ở 500 ký tự.",
-              "error"
-            );
-          } else {
-            showStatus("Đã dán liên kết thành công.", "success");
-          }
+          showStatus("Đã dán liên kết thành công.", "success");
         }
       } catch {
-        showStatus(
-          "Không thể truy cập bộ nhớ tạm. Hãy chạm giữ ô nhập rồi chọn Dán.",
-          "error"
-        );
+        showStatus("Không thể truy cập bộ nhớ tạm.", "error");
       }
     });
   }
 
   /* ========================================
-     NÚT TẢI VIDEO
-  ======================================== */
-
-  if (downloadBtn) {
-    downloadBtn.addEventListener("click", () => {
-      if (!videoUrl) return;
-
-      const value = videoUrl.value.trim();
-
-      if (!value) {
-        videoUrl.classList.add("invalid");
-        showStatus("Mày hãy nhập liên kết video trước nhé.", "error");
-        videoUrl.focus();
-        return;
-      }
-
-      if (value.length > MAX_LENGTH) {
-        showStatus(
-          "Liên kết vượt quá giới hạn 500 ký tự.",
-          "error"
-        );
-        return;
-      }
-
-      const detected = detectPlatform(value);
-
-      if (!detected) {
-        videoUrl.classList.add("invalid");
-        showStatus(
-          "Liên kết không hợp lệ hoặc chưa thuộc nền tảng được hỗ trợ.",
-          "error"
-        );
-        videoUrl.focus();
-        return;
-      }
-
-      showStatus(
-        `Đã nhận diện ${detected}. Chức năng tải video thực tế chưa được kết nối máy chủ/API.`,
-        "info"
-      );
-    });
-  }
-
-  /* ========================================
-     ĐIỀU HƯỚNG CÁC TRANG
+     ĐIỀU HƯỚNG CÁC TRANG (SECTIONS)
   ======================================== */
 
   function openSection(target) {
     const targetSection = document.getElementById(target);
-
-    if (!targetSection || !targetSection.classList.contains("section")) {
-      return;
-    }
+    if (!targetSection) return;
 
     sections.forEach((section) => {
       section.classList.toggle("active", section.id === target);
@@ -362,20 +191,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     navButtons.forEach((button) => {
       const isActive = button.dataset.target === target;
-
       button.classList.toggle("active", isActive);
-
-      if (isActive) {
-        button.setAttribute("aria-current", "page");
-      } else {
-        button.removeAttribute("aria-current");
-      }
     });
 
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   navButtons.forEach((button) => {
@@ -396,18 +215,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  /* ========================================
-     KHỞI TẠO GIAO DIỆN
-  ======================================== */
-
   updateInput();
   updatePlatformCards("");
-
-  platforms.forEach((item) => {
-    item.setAttribute("aria-pressed", "false");
-  });
-
-  console.log("Chinh Video Downloader đã khởi tạo.");
 });
 
 
@@ -447,11 +256,11 @@ auth.onAuthStateChanged((user) => {
   }
 });
 
-// Đăng ký tài khoản mới + Gửi email xác minh + Cấp mã VN-xxxxxx
+// 1. Đăng ký tài khoản mới (ở trang đăng ký riêng)
 function handleSignup() {
-  const email = document.getElementById('authEmail').value.trim();
-  const password = document.getElementById('authPassword').value;
-  const msgElement = document.getElementById('authMessage');
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const msgElement = document.getElementById('regMessage');
 
   if (!email || !password) {
     if (msgElement) msgElement.innerText = "Vui lòng nhập đầy đủ Gmail và mật khẩu!";
@@ -461,8 +270,6 @@ function handleSignup() {
   auth.createUserWithEmailAndPassword(email, password)
     .then((userCredential) => {
       const user = userCredential.user;
-      
-      // Tự động gửi email xác minh đến tài khoản Gmail vừa đăng ký
       user.sendEmailVerification().then(() => {
         const uniqueId = 'VN-' + Math.floor(100000 + Math.random() * 900000);
         const currentTime = new Date().getTime();
@@ -475,7 +282,7 @@ function handleSignup() {
         }).then(() => {
           if (msgElement) {
             msgElement.style.color = "#168344";
-            msgElement.innerText = "Đăng ký thành công! Đã gửi email xác minh đến Gmail của bạn. Mã ID: " + uniqueId;
+            msgElement.innerText = "Đăng ký thành công! Đã gửi email xác minh. Mã ID: " + uniqueId;
           }
         });
       });
@@ -488,7 +295,7 @@ function handleSignup() {
     });
 }
 
-// Đăng nhập tài khoản
+// 2. Đăng nhập tài khoản
 function handleLogin() {
   const email = document.getElementById('authEmail').value.trim();
   const password = document.getElementById('authPassword').value;
@@ -508,12 +315,64 @@ function handleLogin() {
     });
 }
 
+// 3. Quên mật khẩu
+function handleForgotPassword() {
+  const email = document.getElementById('authEmail').value.trim();
+  const msgElement = document.getElementById('authMessage');
+
+  if (!email) {
+    if (msgElement) {
+      msgElement.style.color = "#d92d3a";
+      msgElement.innerText = "Vui lòng nhập Gmail vào ô bên trên để lấy lại mật khẩu!";
+    }
+    return;
+  }
+
+  auth.sendPasswordResetEmail(email)
+    .then(() => {
+      if (msgElement) {
+        msgElement.style.color = "#168344";
+        msgElement.innerText = "Đã gửi liên kết khôi phục mật khẩu tới email: " + email;
+      }
+    })
+    .catch((error) => {
+      if (msgElement) {
+        msgElement.style.color = "#d92d3a";
+        msgElement.innerText = "Lỗi: " + error.message;
+      }
+    });
+}
+
+// 4. Chức năng ẩn/hiện mật khẩu (Icon con mắt)
+function togglePasswordVisibility(inputId, iconId) {
+  const passwordInput = document.getElementById(inputId);
+  const toggleIcon = document.getElementById(iconId);
+  if (!passwordInput) return;
+
+  if (passwordInput.type === "password") {
+    passwordInput.type = "text";
+    if (toggleIcon) toggleIcon.textContent = "🙈"; 
+  } else {
+    passwordInput.type = "password";
+    if (toggleIcon) toggleIcon.textContent = "👁️"; 
+  }
+}
+
+// Chuyển đổi qua lại giữa các phần tử giao diện xác thực (Đăng nhập / Đăng ký)
+function showAuthSection(sectionId) {
+  const loginSection = document.getElementById('authScreen');
+  const registerSection = document.getElementById('registerSection');
+
+  if (loginSection) loginSection.style.display = (sectionId === 'login') ? 'flex' : 'none';
+  if (registerSection) registerSection.style.display = (sectionId === 'register') ? 'flex' : 'none';
+}
+
 // Đăng xuất tài khoản
 function handleLogout() {
   auth.signOut();
 }
 
-// Kiểm tra thời hạn 14 ngày dùng thử
+// Kiểm tra thời hạn dùng thử 14 ngày
 function checkTrialStatus(uid) {
   db.collection("users").doc(uid).get().then((doc) => {
     const lockScreen = document.getElementById('lockScreen');
@@ -524,18 +383,16 @@ function checkTrialStatus(uid) {
       const data = doc.data();
       const uniqueId = data.uniqueId || "VN-151120";
       const createdAt = data.createdAt;
-      const accountStatus = data.status; // 'trial' hoặc 'active'
+      const accountStatus = data.status;
 
       if (userIdDisplay) userIdDisplay.innerText = uniqueId;
 
-      // Nếu tài khoản đã được admin kích hoạt vĩnh viễn
       if (accountStatus === 'active') {
         if (lockScreen) lockScreen.style.display = 'none';
         if (mainAppContent) mainAppContent.style.display = 'block';
         return;
       }
 
-      // Tính thời gian dùng thử (14 ngày)
       const now = new Date().getTime();
       const fourteenDays = 14 * 24 * 60 * 60 * 1000;
 
@@ -556,5 +413,5 @@ function copyUserId() {
   navigator.clipboard.writeText(userIdText).then(() => {
     alert("Đã sao chép mã định danh: " + userIdText);
   });
-       }
-           
+}
+

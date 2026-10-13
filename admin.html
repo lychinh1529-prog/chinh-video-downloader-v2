@@ -3,139 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chinh Video - Admin Panel</title>
+    <title>Chinh Video Downloader</title>
+    <link rel="stylesheet" href="style.css">
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
-        .container { max-width: 500px; margin: 0 auto; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        h2 { text-align: center; color: #1a1a1a; margin-bottom: 20px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        h1 { text-align: center; color: #0066ff; margin-bottom: 5px; }
+        p.subtitle { text-align: center; color: #666; margin-bottom: 25px; }
+        .auth-box, .downloader-box { background: #f8f9fa; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #eee; }
         .form-group { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 6px; font-size: 14px; color: #333; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 14px; box-sizing: border-box; outline: none; }
-        input:focus, select:focus { border-color: #0066ff; }
-        button { width: 100%; background: #0066ff; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 14px; box-sizing: border-box; outline: none; }
+        input:focus { border-color: #0066ff; }
+        button { width: 100%; background: #0066ff; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; }
         button:hover { opacity: 0.9; }
-        .result-box { margin-top: 20px; background: #f8f9fa; padding: 15px; border-radius: 10px; border-left: 4px solid #0066ff; display: none; font-size: 14px; line-height: 1.5; }
+        .btn-secondary { background: #6c757d; margin-top: 8px; }
+        .status-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        .pro-badge { background: #ffc107; color: #000; }
+        .free-badge { background: #e9ecef; color: #495057; }
+        .result-box { margin-top: 15px; padding: 12px; border-radius: 8px; background: #e2f0d9; border-left: 4px solid #28a745; display: none; font-size: 14px; }
     </style>
 </head>
 <body>
 <div class="container">
-    <h2>🛠️ Quản lý tài khoản</h2>
-    
-    <div class="form-group">
-        <label>Link API Render của bạn:</label>
-        <input type="text" id="apiUrl" value="https://chinh-video-api.onrender.com">
+    <h1>📥 Chinh Video Downloader</h1>
+    <p class="subtitle">Tải video đa nền tảng không giới hạn</p>
+
+    <!-- PHẦN ĐĂNG NHẬP / KIỂM TRA TÀI KHOẢN NGƯỜI DÙNG -->
+    <div class="auth-box">
+        <h3>👤 Tài khoản của bạn</h3>
+        <div class="form-group">
+            <label>Tên đăng nhập:</label>
+            <input type="text" id="loginUsername" placeholder="Nhập username của bạn...">
+        </div>
+        <button onclick="userLogin()">Đăng nhập / Kiểm tra hạn</button>
+        
+        <div id="userInfo" style="margin-top: 15px; display: none; font-size: 14px; line-height: 1.6;">
+            - Trạng thái: <span id="userStatusBadge" class="status-badge free-badge">Free</span><br>
+            - Hạn dùng thử/Pro đến: <span id="userExpire">--</span>
+        </div>
     </div>
 
-    <div class="form-group">
-        <label>Tên tài khoản (Username):</label>
-        <input type="text" id="username" placeholder="Nhập tên user (VD: chinhly_212)">
+    <!-- PHẦN TRANG CHỦ TẢI VIDEO -->
+    <div class="downloader-box">
+        <h3>🔗 Tải video</h3>
+        <div class="form-group">
+            <label>Dán link video:</label>
+            <input type="text" id="videoUrl" placeholder="https://...">
+        </div>
+        <button onclick="downloadVideo()">Bắt đầu tải</button>
+        <div id="downloadResult" class="result-box"></div>
     </div>
-
-    <button onclick="checkUser()">Kiểm tra thông tin</button>
-
-    <hr style="margin: 25px 0; border: 0; border-top: 1px solid #eee;">
-
-    <div class="form-group">
-        <label>Cấp quyền Pro:</label>
-        <select id="isPro">
-            <option value="true">Bật Pro (True)</option>
-            <option value="false">Tắt Pro (False)</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label>Cộng thêm ngày dùng thử:</label>
-        <input type="number" id="extendDays" value="14">
-    </div>
-
-    <button style="background: #28a745;" onclick="updateUser()">Cập nhật ngay</button>
-
-    <div id="resultBox" class="result-box"></div>
 </div>
 
+<script src="script.js"></script>
 <script>
-    async function checkUser() {
-        const url = document.getElementById('apiUrl').value.trim();
-        const username = document.getElementById('username').value.trim();
-        const box = document.getElementById('resultBox');
-        
-        if (!username) { 
-            alert('Vui lòng nhập tên tài khoản!'); 
-            return; 
+    const API_URL = "https://chinh-video-api.onrender.com";
+
+    async function userLogin() {
+        const username = document.getElementById('loginUsername').value.trim();
+        const infoBox = document.getElementById('userInfo');
+        const badge = document.getElementById('userStatusBadge');
+        const expireText = document.getElementById('userExpire');
+
+        if (!username) {
+            alert('Vui lòng nhập tên tài khoản!');
+            return;
         }
-        
+
         try {
-            const res = await fetch(`${url}/api/user/${username}`);
-            box.style.display = 'block';
-            
-            // Nếu tài khoản không tồn tại trên Render (trả về lỗi 404 hoặc khác 200)
+            const res = await fetch(`${API_URL}/api/user/${username}`);
+            infoBox.style.display = 'block';
+
             if (!res.ok) {
-                box.style.borderLeftColor = '#e41e3f';
-                box.innerHTML = `<span style="color:#e41e3f; font-weight:bold;">❌ Tài khoản "${username}" không tồn tại trên hệ thống!</span>`;
+                badge.className = 'status-badge free-badge';
+                badge.innerText = 'Không tồn tại';
+                expireText.innerText = 'Tài khoản chưa được đăng ký trên hệ thống.';
                 return;
             }
 
             const data = await res.json();
-            box.style.borderLeftColor = '#0066ff';
-            box.innerHTML = `<b>Thông tin tài khoản:</b><br>` +
-                            `- User: ${data.username}<br>` +
-                            `- Pro: <b>${data.is_pro ? 'Đang bật ⭐' : 'Chưa bật'}</b><br>` +
-                            `- Còn hạn dùng thử: ${data.is_trial_active ? 'Còn' : 'Hết'}<br>` +
-                            `- Hết hạn: ${new Date(data.trial_expires_at).toLocaleString()}`;
-        } catch (err) { 
-            box.style.display = 'block'; 
-            box.style.borderLeftColor = '#e41e3f';
-            box.innerHTML = `<span style="color:#e41e3f;">⚠️ Lỗi kết nối đến máy chủ API!</span>`; 
+            if (data.is_pro) {
+                badge.className = 'status-badge pro-badge';
+                badge.innerText = 'PRO ⭐';
+            } else {
+                badge.className = 'status-badge free-badge';
+                badge.innerText = 'FREE';
+            }
+            expireText.innerText = new Date(data.trial_expires_at).toLocaleString();
+        } catch (err) {
+            alert('Không thể kết nối đến máy chủ API!');
         }
     }
 
-    async function updateUser() {
-        const url = document.getElementById('apiUrl').value.trim();
-        const username = document.getElementById('username').value.trim();
-        const isPro = document.getElementById('isPro').value === 'true';
-        const extendDays = parseInt(document.getElementById('extendDays').value) || 0;
-        const box = document.getElementById('resultBox');
-        
-        if (!username) { 
-            alert('Vui lòng nhập tên tài khoản!'); 
-            return; 
-        }
-        
-        try {
-            // Bước 1: Kiểm tra bắt buộc user phải tồn tại trước khi cập nhật
-            const checkRes = await fetch(`${url}/api/user/${username}`);
-            box.style.display = 'block';
-            
-            if (!checkRes.ok) {
-                box.style.borderLeftColor = '#e41e3f';
-                box.innerHTML = `<span style="color:#e41e3f; font-weight:bold;">❌ Không thể cập nhật: Tài khoản "${username}" không tồn tại!</span>`;
-                return;
-            }
+    function downloadVideo() {
+        const url = document.getElementById('videoUrl').value.trim();
+        const resultBox = document.getElementById('downloadResult');
 
-            // Bước 2: Gửi lệnh cập nhật nếu user hợp lệ
-            const res = await fetch(`${url}/api/admin/update-user/${username}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ is_pro: isPro, extend_days: extendDays })
-            });
-            
-            if (!res.ok) {
-                box.style.borderLeftColor = '#e41e3f';
-                box.innerHTML = `<span style="color:#e41e3f; font-weight:bold;">❌ Lỗi từ máy chủ khi cập nhật!</span>`;
-                return;
-            }
-
-            const data = await res.json();
-            box.style.borderLeftColor = '#28a745';
-            box.innerHTML = `<span style="color:#28a745; font-weight:bold;">✅ ${data.message || 'Cập nhật thành công!'}</span>`;
-            
-            // Tự động load lại thông tin sau khi cập nhật
-            checkUser();
-        } catch (err) { 
-            box.style.display = 'block'; 
-            box.style.borderLeftColor = '#e41e3f';
-            box.innerHTML = `<span style="color:#e41e3f;">⚠️ Lỗi kết nối khi cập nhật!</span>`; 
+        if (!url) {
+            alert('Vui lòng nhập link video!');
+            return;
         }
+
+        resultBox.style.display = 'block';
+        resultBox.innerHTML = '⏳ Đang xử lý yêu cầu tải video từ máy chủ...';
+        
+        // Gọi logic xử lý file script.js của bạn tại đây
     }
 </script>
 </body>

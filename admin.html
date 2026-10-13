@@ -68,7 +68,8 @@
             const res = await fetch(`${url}/api/user/${username}`);
             box.style.display = 'block';
             
-            if (res.status === 404) {
+            // Nếu tài khoản không tồn tại trên Render (trả về lỗi 404 hoặc khác 200)
+            if (!res.ok) {
                 box.style.borderLeftColor = '#e41e3f';
                 box.innerHTML = `<span style="color:#e41e3f; font-weight:bold;">❌ Tài khoản "${username}" không tồn tại trên hệ thống!</span>`;
                 return;
@@ -101,17 +102,26 @@
         }
         
         try {
+            // Bước 1: Kiểm tra bắt buộc user phải tồn tại trước khi cập nhật
+            const checkRes = await fetch(`${url}/api/user/${username}`);
+            box.style.display = 'block';
+            
+            if (!checkRes.ok) {
+                box.style.borderLeftColor = '#e41e3f';
+                box.innerHTML = `<span style="color:#e41e3f; font-weight:bold;">❌ Không thể cập nhật: Tài khoản "${username}" không tồn tại!</span>`;
+                return;
+            }
+
+            // Bước 2: Gửi lệnh cập nhật nếu user hợp lệ
             const res = await fetch(`${url}/api/admin/update-user/${username}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ is_pro: isPro, extend_days: extendDays })
             });
             
-            box.style.display = 'block';
-            
-            if (res.status === 404) {
+            if (!res.ok) {
                 box.style.borderLeftColor = '#e41e3f';
-                box.innerHTML = `<span style="color:#e41e3f; font-weight:bold;">❌ Không thể cập nhật: Tài khoản không tồn tại!</span>`;
+                box.innerHTML = `<span style="color:#e41e3f; font-weight:bold;">❌ Lỗi từ máy chủ khi cập nhật!</span>`;
                 return;
             }
 
@@ -119,6 +129,7 @@
             box.style.borderLeftColor = '#28a745';
             box.innerHTML = `<span style="color:#28a745; font-weight:bold;">✅ ${data.message || 'Cập nhật thành công!'}</span>`;
             
+            // Tự động load lại thông tin sau khi cập nhật
             checkUser();
         } catch (err) { 
             box.style.display = 'block'; 

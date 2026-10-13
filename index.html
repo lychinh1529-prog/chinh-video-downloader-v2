@@ -3,146 +3,265 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chinh Video Downloader & Admin</title>
+    <title>Chinh Video Downloader</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        .admin-section {
-            max-width: 500px;
-            margin: 30px auto;
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            color: #333;
+        :root {
+            --primary-color: #0066ff;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #e5e7eb;
         }
-        .admin-section h2 { text-align: center; margin-bottom: 15px; }
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
-        .btn-admin { width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 5px; }
-        .btn-check { background: #0066ff; color: white; }
-        .btn-update { background: #28a745; color: white; }
-        .result-box { margin-top: 15px; padding: 12px; border-radius: 8px; background: #f8f9fa; border-left: 4px solid #0066ff; display: none; font-size: 14px; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            color: var(--text-color);
+            padding-bottom: 70px;
+        }
+        .app-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo-icon {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #0066ff, #00c6ff);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(0,102,255,0.3);
+        }
+        .logo-text h1 {
+            font-size: 18px;
+            margin: 0;
+            font-weight: 700;
+        }
+        .logo-text span {
+            font-size: 12px;
+            color: #666;
+        }
+        .settings-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .hero-banner {
+            margin-bottom: 20px;
+        }
+        .hero-banner h2 {
+            font-size: 22px;
+            line-height: 1.4;
+            color: #111;
+            margin-bottom: 8px;
+        }
+        .hero-banner p {
+            font-size: 14px;
+            color: #666;
+            margin: 0;
+            line-height: 1.5;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+        }
+        .card-title {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .platform-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .platform-item {
+            background: #f8f9fa;
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .input-box {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 14px;
+            box-sizing: border-box;
+            outline: none;
+            background: #fdfdfd;
+            transition: all 0.3s;
+        }
+        .input-box:focus {
+            border-color: var(--primary-color);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(0,102,255,0.1);
+        }
+        .btn-primary {
+            width: 100%;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            margin-top: 12px;
+            box-shadow: 0 4px 12px rgba(0,102,255,0.2);
+            transition: opacity 0.2s;
+        }
+        .btn-primary:active {
+            opacity: 0.85;
+        }
+        /* Thanh điều hướng dưới cùng */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -4px 16px rgba(0,0,0,0.05);
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #666;
+            font-size: 11px;
+            font-weight: 600;
+            gap: 4px;
+        }
+        .nav-item.active {
+            color: var(--primary-color);
+        }
+        .nav-icon {
+            font-size: 20px;
+        }
+        .result-panel {
+            margin-top: 15px;
+            padding: 14px;
+            border-radius: 10px;
+            background: #f0f7ff;
+            border-left: 4px solid var(--primary-color);
+            display: none;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
 
-    <!-- KHU VỰC TẢI VIDEO DÀNH CHO NGƯỜI DÙNG -->
-    <div class="main-container">
-        <h1>📥 Chinh Video Downloader</h1>
-        <p>Tải video đa nền tảng dễ dàng</p>
+<div class="app-container">
+    <!-- Header -->
+    <div class="header">
+        <div class="logo-area">
+            <div class="logo-icon">▶</div>
+            <div class="logo-text">
+                <h1>CHINH VIDEO</h1>
+                <span>Downloader</span>
+            </div>
+        </div>
+        <div class="settings-btn" onclick="alert('Trang cài đặt tài khoản & cấu hình')">⚙️</div>
     </div>
 
-    <!-- KHU VỰC QUẢN LÝ TÀI KHOẢN (ADMIN) -->
-    <div class="admin-section">
-        <h2>🛠️ Quản lý tài khoản Admin</h2>
+    <!-- Banner -->
+    <div class="hero-banner">
+        <h2>Tải video từ mọi nền tảng <span style="color: var(--primary-color);">nhanh chóng và dễ dàng</span></h2>
+        <p>Chinh Video Downloader giúp bạn xử lý liên kết video từ YouTube, Douyin, Bilibili và TikTok ngay trên điện thoại.</p>
+    </div>
+
+    <!-- Chọn nền tảng -->
+    <div class="card">
+        <div class="card-title">📱 Chọn nền tảng</div>
+        <div class="platform-grid">
+            <div class="platform-item">▶️ YouTube</div>
+            <div class="platform-item">🎵 Douyin</div>
+            <div class="platform-item">📺 Bilibili</div>
+            <div class="platform-item">🎶 TikTok</div>
+        </div>
+    </div>
+
+    <!-- Ô dán link tải video -->
+    <div class="card">
+        <div class="card-title">🔗 Dán liên kết video</div>
+        <input type="text" id="videoUrl" class="input-box" placeholder="Dán liên kết video vào đây...">
+        <button class="btn-primary" onclick="handleDownload()">Bắt đầu tải xuống</button>
+        <div id="resultBox" class="result-panel"></div>
+    </div>
+</div>
+
+<!-- Thanh điều hướng dưới -->
+<div class="bottom-nav">
+    <a href="#" class="nav-item active">
+        <span class="nav-icon">🏠</span>
+        <span>Trang chủ</span>
+    </a>
+    <a href="#" class="nav-item" onclick="alert('Tính năng chỉnh sửa video đang phát triển')">
+        <span class="nav-icon">✂️</span>
+        <span>Chỉnh sửa</span>
+    </a>
+    <a href="#" class="nav-item" onclick="alert('Mục cài đặt và tài khoản')">
+        <span class="nav-icon">⚙️</span>
+        <span>Cài đặt</span>
+    </a>
+</div>
+
+<script src="script.js"></script>
+<script>
+    function handleDownload() {
+        const url = document.getElementById('videoUrl').value.trim();
+        const box = document.getElementById('resultBox');
         
-        <div class="form-group">
-            <label>Link API Render:</label>
-            <input type="text" id="apiUrl" value="https://chinh-video-api.onrender.com">
-        </div>
-
-        <div class="form-group">
-            <label>Tên tài khoản (Username):</label>
-            <input type="text" id="username" placeholder="Nhập tên user (VD: chinhly_212)">
-        </div>
-
-        <button class="btn-admin btn-check" onclick="checkUser()">Kiểm tra thông tin</button>
-
-        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
-
-        <div class="form-group">
-            <label>Cấp quyền Pro:</label>
-            <select id="isPro">
-                <option value="true">Bật Pro (True)</option>
-                <option value="false">Tắt Pro (False)</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>Cộng thêm ngày dùng thử:</label>
-            <input type="number" id="extendDays" value="14">
-        </div>
-
-        <button class="btn-admin btn-update" onclick="updateUser()">Cập nhật ngay</button>
-
-        <div id="resultBox" class="result-box"></div>
-    </div>
-
-    <script src="script.js"></script>
-    <script>
-        async function checkUser() {
-            const url = document.getElementById('apiUrl').value.trim();
-            const username = document.getElementById('username').value.trim();
-            const box = document.getElementById('resultBox');
-            
-            if (!username) { 
-                alert('Vui lòng nhập tên tài khoản!'); 
-                return; 
-            }
-            
-            try {
-                const res = await fetch(`${url}/api/user/${username}`);
-                box.style.display = 'block';
-                
-                if (res.status === 404) {
-                    box.style.borderLeftColor = '#e41e3f';
-                    box.innerHTML = `<span style="color:#e41e3f; font-weight:bold;">❌ Lỗi 404: Tài khoản "${username}" không tồn tại!</span>`;
-                    return;
-                }
-
-                const data = await res.json();
-                box.style.borderLeftColor = '#0066ff';
-                box.innerHTML = `<b>Thông tin tài khoản:</b><br>` +
-                                `- User: ${data.username}<br>` +
-                                `- Pro: <b>${data.is_pro ? 'Đang bật ⭐' : 'Chưa bật'}</b><br>` +
-                                `- Còn hạn dùng thử: ${data.is_trial_active ? 'Còn' : 'Hết'}<br>` +
-                                `- Hết hạn: ${new Date(data.trial_expires_at).toLocaleString()}`;
-            } catch (err) { 
-                box.style.display = 'block'; 
-                box.style.borderLeftColor = '#e41e3f';
-                box.innerHTML = `<span style="color:#e41e3f;">⚠️ Lỗi kết nối đến máy chủ API!</span>`; 
-            }
+        if (!url) {
+            alert('Vui lòng dán link video cần tải!');
+            return;
         }
+        
+        box.style.display = 'block';
+        box.innerHTML = '⏳ Đang kết nối tới máy chủ để trích xuất video...';
+    }
+</script>
 
-        async function updateUser() {
-            const url = document.getElementById('apiUrl').value.trim();
-            const username = document.getElementById('username').value.trim();
-            const isPro = document.getElementById('isPro').value === 'true';
-            const extendDays = parseInt(document.getElementById('extendDays').value) || 0;
-            const box = document.getElementById('resultBox');
-            
-            if (!username) { 
-                alert('Vui lòng nhập tên tài khoản!'); 
-                return; 
-            }
-            
-            try {
-                const res = await fetch(`${url}/api/admin/update-user/${username}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ is_pro: isPro, extend_days: extendDays })
-                });
-                
-                box.style.display = 'block';
-                
-                if (res.status === 404) {
-                    box.style.borderLeftColor = '#e41e3f';
-                    box.innerHTML = `<span style="color:#e41e3f; font-weight:bold;">❌ Lỗi 404: Không thể cập nhật vì tài khoản không tồn tại!</span>`;
-                    return;
-                }
-
-                const data = await res.json();
-                box.style.borderLeftColor = '#28a745';
-                box.innerHTML = `<span style="color:#28a745; font-weight:bold;">✅ ${data.message || 'Cập nhật thành công!'}</span>`;
-                
-                checkUser();
-            } catch (err) { 
-                box.style.display = 'block'; 
-                box.style.borderLeftColor = '#e41e3f';
-                box.innerHTML = `<span style="color:#e41e3f;">⚠️ Lỗi kết nối khi cập nhật!</span>`; 
-            }
-        }
-    </script>
 </body>
 </html>

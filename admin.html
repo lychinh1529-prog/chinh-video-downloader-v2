@@ -1,115 +1,687 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chinh Video Downloader</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        h1 { text-align: center; color: #0066ff; margin-bottom: 5px; }
-        p.subtitle { text-align: center; color: #666; margin-bottom: 25px; }
-        .auth-box, .downloader-box { background: #f8f9fa; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #eee; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
-        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 14px; box-sizing: border-box; outline: none; }
-        input:focus { border-color: #0066ff; }
-        button { width: 100%; background: #0066ff; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; }
-        button:hover { opacity: 0.9; }
-        .btn-secondary { background: #6c757d; margin-top: 8px; }
-        .status-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
-        .pro-badge { background: #ffc107; color: #000; }
-        .free-badge { background: #e9ecef; color: #495057; }
-        .result-box { margin-top: 15px; padding: 12px; border-radius: 8px; background: #e2f0d9; border-left: 4px solid #28a745; display: none; font-size: 14px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>ADMIN CHINH LY</title>
+
+  <style>
+    :root {
+      --bg: #f3f6fc;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #68758b;
+      --line: #e3e9f2;
+      --blue: #2563eb;
+      --green: #15803d;
+      --red: #b91c1c;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 20px 12px 40px;
+      font-family: system-ui, Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    .container {
+      max-width: 720px;
+      margin: auto;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 25px;
+      margin: 0;
+    }
+
+    h2 {
+      font-size: 18px;
+      margin: 0 0 8px;
+    }
+
+    p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .tag {
+      padding: 7px 10px;
+      border-radius: 20px;
+      background: #dbeafe;
+      color: #1d4ed8;
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .card {
+      background: var(--card);
+      padding: 18px;
+      margin-bottom: 15px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 5px 20px #00000005;
+    }
+
+    .notice {
+      background: #fff7ed;
+      color: #9a3412;
+      padding: 12px;
+      border: 1px solid #fed7aa;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.6;
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin: 12px 0 7px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    input {
+      width: 100%;
+      min-width: 0;
+      padding: 13px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      background: #fff;
+      color: var(--text);
+      font: inherit;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px #2563eb20;
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 12px 14px;
+      min-height: 44px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: .6;
+      cursor: wait;
+    }
+
+    .primary {
+      background: var(--blue);
+      color: white;
+    }
+
+    .success {
+      background: var(--green);
+      color: white;
+    }
+
+    .danger {
+      background: var(--red);
+      color: white;
+    }
+
+    .secondary {
+      background: #e9eef6;
+      color: #334155;
+    }
+
+    .search-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 9px;
+    }
+
+    .details {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .detail {
+      min-width: 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #f8fafc;
+    }
+
+    .detail-label {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 7px;
+    }
+
+    .detail-value {
+      font-weight: 750;
+      overflow-wrap: anywhere;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .pro {
+      color: #92400e;
+      background: #fef3c7;
+    }
+
+    .free {
+      color: #334155;
+      background: #e2e8f0;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .full {
+      width: 100%;
+    }
+
+    .message {
+      display: none;
+      margin-top: 13px;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+    }
+
+    .message.info {
+      display: block;
+      background: #eff6ff;
+      color: #1e40af;
+    }
+
+    .message.error {
+      display: block;
+      background: #fef2f2;
+      color: #991b1b;
+    }
+
+    .message.ok {
+      display: block;
+      background: #f0fdf4;
+      color: #166534;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    footer {
+      padding: 15px;
+      text-align: center;
+      color: #94a3b8;
+      font-size: 12px;
+    }
+
+    @media (max-width: 480px) {
+      h1 { font-size: 21px; }
+
+      .search-row {
+        grid-template-columns: 1fr;
+      }
+
+      .details,
+      .actions {
+        grid-template-columns: 1fr;
+      }
+
+      .card {
+        padding: 15px;
+      }
+    }
+  </style>
 </head>
+
 <body>
-<div class="container">
-    <h1>📥 Chinh Video Downloader</h1>
-    <p class="subtitle">Tải video đa nền tảng không giới hạn</p>
+  <main class="container">
 
-    <!-- PHẦN ĐĂNG NHẬP / KIỂM TRA TÀI KHOẢN NGƯỜI DÙNG -->
-    <div class="auth-box">
-        <h3>👤 Tài khoản của bạn</h3>
-        <div class="form-group">
-            <label>Tên đăng nhập:</label>
-            <input type="text" id="loginUsername" placeholder="Nhập username của bạn...">
-        </div>
-        <button onclick="userLogin()">Đăng nhập / Kiểm tra hạn</button>
-        
-        <div id="userInfo" style="margin-top: 15px; display: none; font-size: 14px; line-height: 1.6;">
-            - Trạng thái: <span id="userStatusBadge" class="status-badge free-badge">Free</span><br>
-            - Hạn dùng thử/Pro đến: <span id="userExpire">--</span>
-        </div>
+    <header>
+      <div>
+        <h1>🛡️ ADMIN CHINH LY</h1>
+        <p>Quản lý tài khoản CHINH VIDEO DOWNLOADER</p>
+      </div>
+      <span class="tag">ADMIN PANEL</span>
+    </header>
+
+    <div class="notice">
+      <strong>Lưu ý:</strong> Đây là giao diện quản trị. Backend phải xác thực quyền admin
+      trước khi cho phép thay đổi tài khoản. Không đặt mật khẩu hoặc khóa bí mật trong HTML.
     </div>
 
-    <!-- PHẦN TRANG CHỦ TẢI VIDEO -->
-    <div class="downloader-box">
-        <h3>🔗 Tải video</h3>
-        <div class="form-group">
-            <label>Dán link video:</label>
-            <input type="text" id="videoUrl" placeholder="https://...">
+    <!-- TÌM TÀI KHOẢN -->
+    <section class="card">
+      <h2>🔎 Tìm tài khoản</h2>
+      <p>Nhập username hoặc ID mà API của mày hỗ trợ.</p>
+
+      <form id="searchForm">
+        <label for="accountId">ID / Username</label>
+
+        <div class="search-row">
+          <input
+            id="accountId"
+            type="text"
+            placeholder="Nhập ID hoặc username..."
+            autocomplete="off"
+            required
+          >
+
+          <button class="primary" id="searchBtn" type="submit">
+            Tìm tài khoản
+          </button>
         </div>
-        <button onclick="downloadVideo()">Bắt đầu tải</button>
-        <div id="downloadResult" class="result-box"></div>
-    </div>
-</div>
+      </form>
 
-<script src="script.js"></script>
-<script>
-    const API_URL = "https://chinh-video-api.onrender.com";
+      <div id="searchMessage" class="message" role="status"></div>
+    </section>
 
-    async function userLogin() {
-        const username = document.getElementById('loginUsername').value.trim();
-        const infoBox = document.getElementById('userInfo');
-        const badge = document.getElementById('userStatusBadge');
-        const expireText = document.getElementById('userExpire');
+    <!-- THÔNG TIN TÀI KHOẢN -->
+    <section class="card hidden" id="profileCard">
+      <h2>👤 Thông tin tài khoản</h2>
 
-        if (!username) {
-            alert('Vui lòng nhập tên tài khoản!');
-            return;
-        }
+      <p>
+        Tài khoản:
+        <strong id="displayName">—</strong>
+      </p>
 
-        try {
-            const res = await fetch(`${API_URL}/api/user/${username}`);
-            infoBox.style.display = 'block';
+      <p>
+        Trạng thái:
+        <span id="statusBadge" class="badge free">FREE</span>
+      </p>
 
-            if (!res.ok) {
-                badge.className = 'status-badge free-badge';
-                badge.innerText = 'Không tồn tại';
-                expireText.innerText = 'Tài khoản chưa được đăng ký trên hệ thống.';
-                return;
-            }
+      <div class="details">
+        <div class="detail">
+          <div class="detail-label">ID / Username</div>
+          <div class="detail-value" id="vId">—</div>
+        </div>
 
-            const data = await res.json();
-            if (data.is_pro) {
-                badge.className = 'status-badge pro-badge';
-                badge.innerText = 'PRO ⭐';
-            } else {
-                badge.className = 'status-badge free-badge';
-                badge.innerText = 'FREE';
-            }
-            expireText.innerText = new Date(data.trial_expires_at).toLocaleString();
-        } catch (err) {
-            alert('Không thể kết nối đến máy chủ API!');
-        }
+        <div class="detail">
+          <div class="detail-label">Gói tài khoản</div>
+          <div class="detail-value" id="vPlan">—</div>
+        </div>
+
+        <div class="detail">
+          <div class="detail-label">Hạn sử dụng</div>
+          <div class="detail-value" id="vExpiry">—</div>
+        </div>
+
+        <div class="detail">
+          <div class="detail-label">Trạng thái hết hạn</div>
+          <div class="detail-value" id="vExpired">—</div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="success" id="enableProBtn" type="button">
+          ⭐ Bật PRO
+        </button>
+
+        <button class="danger" id="disableProBtn" type="button">
+          Tắt PRO
+        </button>
+
+        <button class="secondary full" id="refreshBtn" type="button">
+          ↻ Tải lại thông tin
+        </button>
+      </div>
+
+      <div id="updateMessage" class="message" role="status"></div>
+    </section>
+
+    <!-- GIA HẠN -->
+    <section class="card">
+      <h2>🗓️ Gia hạn tài khoản</h2>
+      <p>Hãy tìm tài khoản trước khi gia hạn.</p>
+
+      <label for="extendDays">Số ngày cần gia hạn</label>
+
+      <input
+        id="extendDays"
+        type="number"
+        min="1"
+        max="3650"
+        step="1"
+        value="30"
+      >
+
+      <div style="margin-top:12px">
+        <button class="primary full" id="extendBtn" type="button">
+          Gia hạn tài khoản
+        </button>
+      </div>
+
+      <div id="extendMessage" class="message" role="status"></div>
+    </section>
+
+    <footer>CHINH VIDEO DOWNLOADER · ADMIN PANEL</footer>
+
+  </main>
+
+  <script>
+    /*
+      API đang được cấu hình theo các endpoint đã gửi trước đó.
+
+      GET:
+      /api/user/{username}
+
+      POST:
+      /api/admin/update-user/{username}
+
+      Lưu ý: Nếu main.py của mày dùng endpoint hoặc tên trường khác,
+      cần sửa cho khớp. Giao diện không thể tự tạo ra dữ liệu tài khoản.
+    */
+
+    const API_BASE = "https://chinh-video-api.onrender.com";
+
+    const USER_ENDPOINT = (username) =>
+      `/api/user/${encodeURIComponent(username)}`;
+
+    const UPDATE_ENDPOINT = (username) =>
+      `/api/admin/update-user/${encodeURIComponent(username)}`;
+
+    let currentAccount = "";
+
+    const $ = (id) => document.getElementById(id);
+
+    function showMessage(id, message, type = "info") {
+      const el = $(id);
+      el.textContent = message;
+      el.className = `message ${type}`;
     }
 
-    function downloadVideo() {
-        const url = document.getElementById('videoUrl').value.trim();
-        const resultBox = document.getElementById('downloadResult');
-
-        if (!url) {
-            alert('Vui lòng nhập link video!');
-            return;
-        }
-
-        resultBox.style.display = 'block';
-        resultBox.innerHTML = '⏳ Đang xử lý yêu cầu tải video từ máy chủ...';
-        
-        // Gọi logic xử lý file script.js của bạn tại đây
+    function clearMessage(id) {
+      const el = $(id);
+      el.textContent = "";
+      el.className = "message";
     }
-</script>
+
+    function formatDate(value) {
+      if (!value) return "API chưa cung cấp";
+
+      const date = new Date(value);
+
+      if (Number.isNaN(date.getTime())) {
+        return String(value);
+      }
+
+      return date.toLocaleString("vi-VN");
+    }
+
+    async function requestAPI(path, options = {}) {
+      const response = await fetch(`${API_BASE}${path}`, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          ...(options.headers || {})
+        }
+      });
+
+      const raw = await response.text();
+
+      let data = {};
+
+      try {
+        data = raw ? JSON.parse(raw) : {};
+      } catch {
+        data = {
+          detail: raw || "Máy chủ không trả về dữ liệu JSON."
+        };
+      }
+
+      if (!response.ok) {
+        const reason =
+          data.detail ||
+          data.message ||
+          `HTTP ${response.status}`;
+
+        throw new Error(reason);
+      }
+
+      return data;
+    }
+
+    function renderAccount(data, fallbackUsername) {
+      /*
+        Các trường dưới đây dựa trên API đã gửi trước đó.
+        Nếu backend trả tên trường khác, cần điều chỉnh.
+      */
+
+      const username =
+        data.username ??
+        data.user_id ??
+        data.id ??
+        fallbackUsername;
+
+      const isPro = Boolean(data.is_pro ?? data.pro ?? false);
+
+      const expiry =
+        data.trial_expires_at ??
+        data.pro_expires_at ??
+        data.expires_at ??
+        null;
+
+      currentAccount = fallbackUsername;
+
+      $("profileCard").classList.remove("hidden");
+
+      $("displayName").textContent = String(username);
+      $("vId").textContent = String(username);
+      $("vPlan").textContent = isPro ? "PRO" : "FREE";
+      $("vExpiry").textContent = formatDate(expiry);
+
+      let expiryStatus = "Không xác định";
+
+      if (expiry) {
+        const date = new Date(expiry);
+
+        if (!Number.isNaN(date.getTime())) {
+          expiryStatus =
+            date.getTime() < Date.now()
+              ? "Đã hết hạn"
+              : "Còn hạn";
+        }
+      } else if (isPro) {
+        expiryStatus = "PRO — chưa có ngày hết hạn";
+      }
+
+      $("vExpired").textContent = expiryStatus;
+
+      $("statusBadge").textContent = isPro ? "PRO" : "FREE";
+      $("statusBadge").className =
+        `badge ${isPro ? "pro" : "free"}`;
+
+      clearMessage("updateMessage");
+      clearMessage("extendMessage");
+    }
+
+    async function searchAccount(username) {
+      username = (username || $("accountId").value).trim();
+
+      if (!username) {
+        showMessage(
+          "searchMessage",
+          "Nhập username hoặc ID trước.",
+          "error"
+        );
+        return;
+      }
+
+      const button = $("searchBtn");
+
+      button.disabled = true;
+      button.textContent = "Đang tìm...";
+
+      clearMessage("searchMessage");
+      $("profileCard").classList.add("hidden");
+
+      try {
+        const data = await requestAPI(USER_ENDPOINT(username));
+
+        renderAccount(data, username);
+
+        showMessage(
+          "searchMessage",
+          "Đã nhận dữ liệu tài khoản từ API.",
+          "ok"
+        );
+      } catch (error) {
+        showMessage(
+          "searchMessage",
+          `Không tìm được tài khoản: ${error.message}. Kiểm tra username, endpoint và main.py.`,
+          "error"
+        );
+      } finally {
+        button.disabled = false;
+        button.textContent = "Tìm tài khoản";
+      }
+    }
+
+    async function updateAccount(payload, messageId, successMessage) {
+      if (!currentAccount) {
+        showMessage(
+          messageId,
+          "Hãy tìm tài khoản trước.",
+          "error"
+        );
+        return;
+      }
+
+      try {
+        const data = await requestAPI(
+          UPDATE_ENDPOINT(currentAccount),
+          {
+            method: "POST",
+            body: JSON.stringify(payload)
+          }
+        );
+
+        showMessage(
+          messageId,
+          data.message || successMessage,
+          "ok"
+        );
+
+        await searchAccount(currentAccount);
+      } catch (error) {
+        showMessage(
+          messageId,
+          `Cập nhật thất bại: ${error.message}. Backend có thể chưa hỗ trợ thao tác này hoặc yêu cầu quyền admin.`,
+          "error"
+        );
+      }
+    }
+
+    $("searchForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+      searchAccount();
+    });
+
+    $("enableProBtn").addEventListener("click", function() {
+      if (!currentAccount) {
+        showMessage("updateMessage", "Hãy tìm tài khoản trước.", "error");
+        return;
+      }
+
+      if (confirm("Mày có chắc muốn bật PRO cho tài khoản này không?")) {
+        updateAccount(
+          {
+            is_pro: true,
+            extend_days: 0
+          },
+          "updateMessage",
+          "Đã gửi yêu cầu bật PRO."
+        );
+      }
+    });
+
+    $("disableProBtn").addEventListener("click", function() {
+      if (!currentAccount) {
+        showMessage("updateMessage", "Hãy tìm tài khoản trước.", "error");
+        return;
+      }
+
+      if (confirm("Mày có chắc muốn tắt PRO cho tài khoản này không?")) {
+        updateAccount(
+          {
+            is_pro: false,
+            extend_days: 0
+          },
+          "updateMessage",
+          "Đã gửi yêu cầu tắt PRO."
+        );
+      }
+    });
+
+    $("extendBtn").addEventListener("click", function() {
+      if (!currentAccount) {
+        showMessage(
+          "extendMessage",
+          "Hãy tìm tài khoản trước khi gia hạn.",
+          "error"
+        );
+        return;
+      }
+
+      const days = Number($("extendDays").value);
+
+      if (!Number.isInteger(days) || days < 1 || days > 3650) {
+        showMessage(
+          "extendMessage",
+          "Nhập số ngày nguyên từ 1 đến 3650.",
+          "error"
+        );
+        return;
+      }
+
+      if (confirm(`Xác nhận gia hạn thêm ${days} ngày?`)) {
+        updateAccount(
+          {
+            is_pro: false,
+            extend_days: days
+          },
+          "extendMessage",
+          `Đã gửi yêu cầu gia hạn ${days} ngày.`
+        );
+      }
+    });
+
+    $("refreshBtn").addEventListener("click", function() {
+      if (currentAccount) {
+        searchAccount(currentAccount);
+      }
+    });
+  </script>
 </body>
-</html>
+    </html>

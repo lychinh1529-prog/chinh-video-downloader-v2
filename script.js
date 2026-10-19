@@ -132,7 +132,254 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (downloadBtn) {
-    downloadBtn.addEventListener("click", async () => {
+    // ========================================
+// CHINH VIDEO DOWNLOADER - GENDOWNLOAD API
+// ========================================
+
+const GENDOWNLOAD_API = "https://gendownload.com/api/extract";
+
+let currentVideoData = null;
+let currentRequestController = null;
+
+// Tạo khu vực hiển thị kết quả
+let videoResult = document.getElementById("videoResult");
+
+if (!videoResult && statusBox) {
+  videoResult = document.createElement("div");
+  videoResult.id = "videoResult";
+  videoResult.style.marginTop = "16px";
+  videoResult.style.display = "none";
+  statusBox.insertAdjacentElement("afterend", videoResult);
+}
+
+// Hiển thị kết quả an toàn
+function renderVideoResult(data) {
+  if (!videoResult) {
+    throw new Error("Không tìm thấy khu vực hiển thị kết quả.");
+  }
+
+  const title =
+    typeof data.title === "string" && data.title.trim()
+      ? data.title.trim()
+      : "Video không có tiêu đề";
+
+  const formats = Array.isArray(data.formats)
+    ? data.formats.filter((format) => {
+        if (!format || typeof format.url !== "string") return false;
+
+        try {
+          const url = new URL(format.url);
+          return url.protocol === "https:" || url.protocol === "http:";
+        } catch {
+          return false;
+        }
+      })
+    : [];
+
+  if (formats.length === 0) {
+    throw new Error(
+      "API đã phản hồi nhưng không có định dạng tải xuống hợp lệ."
+    );
+  }
+
+  // Không chèn dữ liệu API trực tiếp vào HTML
+  videoResult.replaceChildren();
+
+  const card = document.createElement("div");
+  card.style.cssText =
+    "background:#fff;border:1px solid #e1e8f0;" +
+    "border-radius:14px;padding:16px;margin-top:12px;";
+
+  if (typeof data.thumbnail === "string") {
+    try {
+      const thumbnailUrl = new URL(data.thumbnail);
+
+      if (
+        ["https:", "http:"].includes(thumbnailUrl.protocol)
+      ) {
+        const image = document.createElement("img");
+        image.src = thumbnailUrl.href;
+        image.alt = "Ảnh bìa video";
+        image.loading = "lazy";
+        image.referrerPolicy = "no-referrer";
+        image.style.cssText =
+          "width:100%;max-height:240px;object-fit:cover;" +
+          "border-radius:10px;margin-bottom:12px;";
+
+        image.onerror = () => image.remove();
+        card.appendChild(image);
+      }
+    } catch {
+      // Bỏ qua ảnh bìa không hợp lệ
+    }
+  }
+
+  const heading = document.createElement("h3");
+  heading.textContent = title;
+  heading.style.cssText =
+    "font-size:16px;line-height:1.5;margin:0 0 10px;color:#172b4d;";
+  card.appendChild(heading);
+
+  const metadata = document.createElement("p");
+  metadata.style.cssText =
+    "font-size:13px;color:#667085;line-height:1.7;margin:0 0 14px;";
+
+  const details = [];
+
+  if (data.author) details.push("Tác giả: " + data.author);
+  if (data.duration) details.push("Thời lượng: " + data.duration);
+  if (data.views != null) details.push("Lượt xem: " + data.views);
+
+  metadata.textContent = details.join(" · ");
+  card.appendChild(metadata);
+
+  const formatHeading = document.createElement("h4");
+  formatHeading.textContent = "Chọn định dạng tải xuống";
+  formatHeading.style.margin = "0 0 10px";
+  card.appendChild(formatHeading);
+
+  formats.forEach((format) => {
+    const link = document.createElement("a");
+    link.href = format.url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent =
+      "↓ " +
+      (format.label || format.type || "Tải video") +
+      (format.ext ? " (" + format.ext + ")" : "");
+
+    link.style.cssText =
+      "display:block;padding:12px;margin-top:8px;" +
+      "background:#075de0;color:white;text-align:center;" +
+      "text-decoration:none;border-radius:10px;font-weight:600;";
+
+    card.appendChild(link);
+  });
+
+  videoResult.appendChild(card);
+  videoResult.style.display = "block";
+}
+
+// Xử lý nút tải video
+if (downloadBtn) {
+  downloadBtn.addEventListener("click", async () => {
+    const urlValue = videoUrl ? videoUrl.value.trim() : "";
+
+    if (!urlValue) {
+      showStatus("Vui lòng dán liên kết video.", "error");
+      return;
+    }
+
+    // Chỉ cho phép URL HTTP/HTTPS từ nền tảng hỗ trợ
+    const detectedPlatform = detectPlatform(urlValue);
+
+    if (!detectedPlatform) {
+      showStatus(
+        "Liên kết không hợp lệ hoặc nền tảng chưa được hỗ trợ.",
+        "error"
+      );
+      return;
+    }
+
+    try {
+      new URL(urlValue);
+    } catch {
+      showStatus("Đường dẫn video không hợp lệ.", "error");
+      return;
+    }
+
+    // Hủy yêu cầu trước nếu người dùng bấm lại
+    if (currentRequestController) {
+      currentRequestController.abort();
+    }
+
+    currentRequestController = new AbortController();
+
+    const controller = currentRequestController;
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+    downloadBtn.disabled = true;
+
+    if (videoResult) {
+      videoResult.replaceChildren();
+      videoResult.style.display = "none";
+    }
+
+    showStatus("Đang kết nối GenDownload API...", "info");
+
+    try {
+      const response = await fetch(GENDOWNLOAD_API, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({
+          url: urlValue
+        }),
+        signal: controller.signal
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          "API trả về lỗi HTTP " + response.status + "."
+        );
+      }
+
+      const data = await response.json();
+
+      if (!data || typeof data !== "object") {
+        throw new Error("API trả về dữ liệu không hợp lệ.");
+      }
+
+      // Nếu API có trường báo lỗi, không coi đó là thành công
+      if (
+        data.error ||
+        data.success === false ||
+        data.status === "error"
+      ) {
+        throw new Error(
+          typeof data.error === "string"
+            ? data.error
+            : "API không thể xử lý video này."
+        );
+      }
+
+      // Phải có định dạng tải xuống hợp lệ mới hiển thị thành công
+      renderVideoResult(data);
+
+      currentVideoData = data;
+
+      showStatus(
+        "Đã lấy thông tin video thành công. Hãy chọn định dạng để tải xuống.",
+        "success"
+      );
+    } catch (error) {
+      if (error.name === "AbortError") {
+        showStatus(
+          "Yêu cầu bị hủy hoặc đã quá 30 giây. Hãy thử lại.",
+          "error"
+        );
+      } else {
+        console.error("GenDownload API error:", error);
+
+        showStatus(
+          "Không lấy được video: " +
+            (error.message || "Lỗi kết nối API.") +
+            " Hãy thử lại sau.",
+          "error"
+        );
+      }
+    } finally {
+      clearTimeout(timeoutId);
+
+      if (currentRequestController === controller) {
+        currentRequestController = null;
+        downloadBtn.disabled = false;
+      }
+    }
+  });
+}
       const urlValue = videoUrl ? videoUrl.value.trim() : "";
       if (!urlValue) return;
       downloadBtn.disabled = true;
